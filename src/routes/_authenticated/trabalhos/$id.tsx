@@ -178,7 +178,10 @@ function FilesSection({ jobId, files }: { jobId: string; files: JobFile[] }) {
 
   async function download(f: JobFile) {
     const { data, error } = await supabase.storage.from("ecu-files").download(f.path);
-    if (error || !data) return toast.error("Não foi possível descarregar");
+    if (error || !data) {
+      toast.error("Não foi possível descarregar");
+      return;
+    }
     const url = URL.createObjectURL(data);
     const a = document.createElement("a");
     a.href = url;
