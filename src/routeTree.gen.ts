@@ -10,33 +10,88 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedTrabalhosIndexRouteImport } from './routes/_authenticated/trabalhos/index'
+import { Route as AuthenticatedTrabalhosIdRouteImport } from './routes/_authenticated/trabalhos/$id'
+import { Route as AuthenticatedTrabalhosNovoRouteImport } from './routes/_authenticated/trabalhos/novo'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedTrabalhosIndexRoute =
+  AuthenticatedTrabalhosIndexRouteImport.update({
+    id: '/trabalhos/',
+    path: '/trabalhos/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedTrabalhosIdRoute =
+  AuthenticatedTrabalhosIdRouteImport.update({
+    id: '/trabalhos/$id',
+    path: '/trabalhos/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedTrabalhosNovoRoute =
+  AuthenticatedTrabalhosNovoRouteImport.update({
+    id: '/trabalhos/novo',
+    path: '/trabalhos/novo',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/trabalhos/$id': typeof AuthenticatedTrabalhosIdRoute
+  '/trabalhos/novo': typeof AuthenticatedTrabalhosNovoRoute
+  '/trabalhos/': typeof AuthenticatedTrabalhosIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/trabalhos/$id': typeof AuthenticatedTrabalhosIdRoute
+  '/trabalhos/novo': typeof AuthenticatedTrabalhosNovoRoute
+  '/trabalhos': typeof AuthenticatedTrabalhosIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/auth': typeof AuthRoute
+  '/_authenticated/trabalhos/$id': typeof AuthenticatedTrabalhosIdRoute
+  '/_authenticated/trabalhos/novo': typeof AuthenticatedTrabalhosNovoRoute
+  '/_authenticated/trabalhos/': typeof AuthenticatedTrabalhosIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    '/' | '/auth' | '/trabalhos/$id' | '/trabalhos/novo' | '/trabalhos/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/auth' | '/trabalhos/$id' | '/trabalhos/novo' | '/trabalhos'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/auth'
+    | '/_authenticated/trabalhos/$id'
+    | '/_authenticated/trabalhos/novo'
+    | '/_authenticated/trabalhos/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AuthRoute: typeof AuthRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +103,63 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/trabalhos/': {
+      id: '/_authenticated/trabalhos/'
+      path: '/trabalhos'
+      fullPath: '/trabalhos/'
+      preLoaderRoute: typeof AuthenticatedTrabalhosIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/trabalhos/$id': {
+      id: '/_authenticated/trabalhos/$id'
+      path: '/trabalhos/$id'
+      fullPath: '/trabalhos/$id'
+      preLoaderRoute: typeof AuthenticatedTrabalhosIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/trabalhos/novo': {
+      id: '/_authenticated/trabalhos/novo'
+      path: '/trabalhos/novo'
+      fullPath: '/trabalhos/novo'
+      preLoaderRoute: typeof AuthenticatedTrabalhosNovoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedTrabalhosIdRoute: typeof AuthenticatedTrabalhosIdRoute
+  AuthenticatedTrabalhosNovoRoute: typeof AuthenticatedTrabalhosNovoRoute
+  AuthenticatedTrabalhosIndexRoute: typeof AuthenticatedTrabalhosIndexRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedTrabalhosIdRoute: AuthenticatedTrabalhosIdRoute,
+  AuthenticatedTrabalhosNovoRoute: AuthenticatedTrabalhosNovoRoute,
+  AuthenticatedTrabalhosIndexRoute: AuthenticatedTrabalhosIndexRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AuthRoute: AuthRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
