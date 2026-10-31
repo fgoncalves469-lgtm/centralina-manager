@@ -65,29 +65,29 @@ export function JobForm({ initial = {}, submitLabel, busy, onSubmit }: Props) {
   return (
     <form onSubmit={submit} className="space-y-6">
       <section className="rounded-xl border bg-card p-5">
-        <h2 className="mb-4 text-2xl">Carro</h2>
+        <h2 className="mb-4 text-2xl">Car</h2>
         <div className="grid gap-4 sm:grid-cols-2">
-          {field("brand", "Marca", { required: true, placeholder: "BMW" })}
-          {field("model", "Modelo", { required: true, placeholder: "320d F30" })}
-          {field("engine", "Motor", { placeholder: "2.0 TDI 150cv" })}
-          {field("year", "Ano", { inputMode: "numeric", placeholder: "2018" })}
-          {field("plate", "Matrícula", { placeholder: "AA-00-BB" })}
-          {field("ecu", "Centralina", { placeholder: "Bosch EDC17C50" })}
+          {field("brand", "Make", { required: true, placeholder: "BMW" })}
+          {field("model", "Model", { required: true, placeholder: "320d F30" })}
+          {field("engine", "Engine", { placeholder: "2.0 TDI 150hp" })}
+          {field("year", "Year", { inputMode: "numeric", placeholder: "2018" })}
+          {field("plate", "Plate", { placeholder: "AA-00-BB" })}
+          {field("ecu", "ECU", { placeholder: "Bosch EDC17C50" })}
         </div>
       </section>
 
       <section className="rounded-xl border bg-card p-5">
-        <h2 className="mb-4 text-2xl">Cliente</h2>
+        <h2 className="mb-4 text-2xl">Client</h2>
         <div className="grid gap-4 sm:grid-cols-2">
-          {field("client_name", "Nome", { required: true })}
-          {field("client_phone", "Telefone", { type: "tel" })}
+          {field("client_name", "Name", { required: true })}
+          {field("client_phone", "Phone", { type: "tel" })}
         </div>
       </section>
 
       <section className="rounded-xl border bg-card p-5">
-        <h2 className="mb-4 text-2xl">Acerto</h2>
+        <h2 className="mb-4 text-2xl">Tune</h2>
         <div className="mb-4 space-y-1.5">
-          <Label>Tipo</Label>
+          <Label>Type</Label>
           <Select value={v.stage} onValueChange={(s) => setV({ ...v, stage: s })}>
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
@@ -96,13 +96,13 @@ export function JobForm({ initial = {}, submitLabel, busy, onSubmit }: Props) {
           </Select>
         </div>
         <div className="grid grid-cols-2 gap-4">
-          {field("hp_before", "cv antes", { inputMode: "decimal" })}
-          {field("hp_after", "cv depois", { inputMode: "decimal" })}
-          {field("nm_before", "Nm antes", { inputMode: "decimal" })}
-          {field("nm_after", "Nm depois", { inputMode: "decimal" })}
+          {field("hp_before", "hp before", { inputMode: "decimal" })}
+          {field("hp_after", "hp after", { inputMode: "decimal" })}
+          {field("nm_before", "Nm before", { inputMode: "decimal" })}
+          {field("nm_after", "Nm after", { inputMode: "decimal" })}
         </div>
         <div className="mt-4 space-y-1.5">
-          <Label htmlFor="notes">Notas</Label>
+          <Label htmlFor="notes">Notes</Label>
           <Textarea id="notes" rows={3} value={v.notes} onChange={set("notes")} />
         </div>
       </section>

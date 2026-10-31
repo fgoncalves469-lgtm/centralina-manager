@@ -35,7 +35,7 @@ function AppLayout() {
           </Link>
           <div className="flex items-center gap-2">
             <span className="hidden text-sm text-muted-foreground sm:inline">{user.email}</span>
-            <Button variant="ghost" size="icon" onClick={signOut} aria-label="Sair">
+            <Button variant="ghost" size="icon" onClick={signOut} aria-label="Sign out">
               <LogOut />
             </Button>
           </div>

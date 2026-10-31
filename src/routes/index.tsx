@@ -5,15 +5,15 @@ import { Button } from "@/components/ui/button";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Remap Garage — Gestão de acertos de centralina" },
+      { title: "Remap Garage — ECU tuning manager" },
       {
         name: "description",
-        content: "Regista carros, clientes, ganhos de potência e ficheiros de centralina num só lugar.",
+        content: "Store reads, maps, notes and logs for every car — shared between the reader and the tuner.",
       },
-      { property: "og:title", content: "Remap Garage — Gestão de acertos de centralina" },
+      { property: "og:title", content: "Remap Garage — ECU tuning manager" },
       {
         property: "og:description",
-        content: "Regista carros, clientes, ganhos de potência e ficheiros de centralina num só lugar.",
+        content: "Store reads, maps, notes and logs for every car — shared between the reader and the tuner.",
       },
     ],
   }),
@@ -21,25 +21,25 @@ export const Route = createFileRoute("/")({
 });
 
 const features = [
-  { icon: Car, title: "Carro e cliente", text: "Marca, modelo, motor, matrícula e contacto." },
-  { icon: Gauge, title: "Antes e depois", text: "cv e Nm com o ganho calculado." },
-  { icon: FileCode2, title: "Ficheiros", text: "Original e modificado guardados com segurança." },
+  { icon: Car, title: "Car & client", text: "Make, model, engine, plate and contact." },
+  { icon: Gauge, title: "Map versions", text: "Every map revision with notes on what changed." },
+  { icon: FileCode2, title: "Logs", text: "Attach logs to each map so the tuner can review them." },
 ];
 
 function Index() {
   return (
     <div className="mx-auto flex min-h-screen max-w-4xl flex-col justify-center px-5 py-16">
-      <p className="mb-3 text-sm font-semibold uppercase tracking-[0.3em] text-primary">Oficina de reprogramação</p>
+      <p className="mb-3 text-sm font-semibold uppercase tracking-[0.3em] text-primary">ECU tuning workflow</p>
       <h1 className="text-6xl leading-none sm:text-8xl">
-        Cada acerto,<br />
-        <span className="text-primary">bem registado.</span>
+        Every map,<br />
+        <span className="text-primary">every log.</span>
       </h1>
       <p className="mt-5 max-w-lg text-lg text-muted-foreground">
-        Gere os acertos de centralina de todos os carros que fazes — com a tua equipa, no telemóvel ou no computador.
+        You read and flash the car, your tuner edits the map. Keep every file, note and log in one place — on phone or desktop.
       </p>
       <div className="mt-8">
         <Button asChild size="lg" className="shadow-glow">
-          <Link to="/trabalhos">Abrir a app</Link>
+          <Link to="/trabalhos">Open the app</Link>
         </Button>
       </div>
       <div className="mt-16 grid gap-4 sm:grid-cols-3">
