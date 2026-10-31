@@ -9,10 +9,10 @@ import type { JobInsert } from "@/lib/jobs";
 export const Route = createFileRoute("/_authenticated/trabalhos/novo")({
   head: () => ({
     meta: [
-      { title: "Novo trabalho — Remap Garage" },
-      { name: "description", content: "Registar um novo acerto de centralina." },
-      { property: "og:title", content: "Novo trabalho — Remap Garage" },
-      { property: "og:description", content: "Registar um novo acerto de centralina." },
+      { title: "New job — Remap Garage" },
+      { name: "description", content: "Add a new ECU tuning job." },
+      { property: "og:title", content: "New job — Remap Garage" },
+      { property: "og:description", content: "Add a new ECU tuning job." },
     ],
   }),
   component: NewJob,
@@ -29,19 +29,19 @@ function NewJob() {
     },
     onSuccess: (job) => {
       qc.invalidateQueries({ queryKey: ["jobs"] });
-      toast.success("Trabalho guardado");
+      toast.success("Job saved");
       navigate({ to: "/trabalhos/$id", params: { id: job.id } });
     },
-    onError: () => toast.error("Não foi possível guardar"),
+    onError: () => toast.error("Could not save"),
   });
 
   return (
     <div className="mx-auto max-w-2xl">
       <Link to="/trabalhos" className="mb-4 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
-        <ArrowLeft className="size-4" /> Trabalhos
+        <ArrowLeft className="size-4" /> Jobs
       </Link>
-      <h1 className="mb-6 text-5xl">Novo trabalho</h1>
-      <JobForm submitLabel="Guardar trabalho" busy={create.isPending} onSubmit={(v) => create.mutate(v)} />
+      <h1 className="mb-6 text-5xl">New job</h1>
+      <JobForm submitLabel="Save job" busy={create.isPending} onSubmit={(v) => create.mutate(v)} />
     </div>
   );
 }

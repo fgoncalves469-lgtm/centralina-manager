@@ -14,6 +14,50 @@ export type Database = {
   }
   public: {
     Tables: {
+      file_logs: {
+        Row: {
+          created_at: string
+          file_id: string
+          file_name: string
+          id: string
+          note: string | null
+          path: string
+          size: number | null
+          uploaded_by: string
+          uploaded_by_email: string | null
+        }
+        Insert: {
+          created_at?: string
+          file_id: string
+          file_name: string
+          id?: string
+          note?: string | null
+          path: string
+          size?: number | null
+          uploaded_by?: string
+          uploaded_by_email?: string | null
+        }
+        Update: {
+          created_at?: string
+          file_id?: string
+          file_name?: string
+          id?: string
+          note?: string | null
+          path?: string
+          size?: number | null
+          uploaded_by?: string
+          uploaded_by_email?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "file_logs_file_id_fkey"
+            columns: ["file_id"]
+            isOneToOne: false
+            referencedRelation: "job_files"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       job_files: {
         Row: {
           created_at: string
@@ -21,9 +65,11 @@ export type Database = {
           id: string
           job_id: string
           kind: string
+          notes: string | null
           path: string
           size: number | null
           uploaded_by: string
+          uploaded_by_email: string | null
         }
         Insert: {
           created_at?: string
@@ -31,9 +77,11 @@ export type Database = {
           id?: string
           job_id: string
           kind?: string
+          notes?: string | null
           path: string
           size?: number | null
           uploaded_by?: string
+          uploaded_by_email?: string | null
         }
         Update: {
           created_at?: string
@@ -41,9 +89,11 @@ export type Database = {
           id?: string
           job_id?: string
           kind?: string
+          notes?: string | null
           path?: string
           size?: number | null
           uploaded_by?: string
+          uploaded_by_email?: string | null
         }
         Relationships: [
           {
@@ -73,6 +123,7 @@ export type Database = {
           notes: string | null
           plate: string | null
           stage: string
+          status: string
           year: number | null
         }
         Insert: {
@@ -92,6 +143,7 @@ export type Database = {
           notes?: string | null
           plate?: string | null
           stage?: string
+          status?: string
           year?: number | null
         }
         Update: {
@@ -111,6 +163,7 @@ export type Database = {
           notes?: string | null
           plate?: string | null
           stage?: string
+          status?: string
           year?: number | null
         }
         Relationships: []

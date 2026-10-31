@@ -5,15 +5,15 @@ import { Plus, Search, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { gainPercent, jobsQuery } from "@/lib/jobs";
+import { gainPercent, jobsQuery, STATUSES, type Status } from "@/lib/jobs";
 
 export const Route = createFileRoute("/_authenticated/trabalhos/")({
   head: () => ({
     meta: [
-      { title: "Trabalhos — Remap Garage" },
-      { name: "description", content: "Lista de acertos de centralina." },
-      { property: "og:title", content: "Trabalhos — Remap Garage" },
-      { property: "og:description", content: "Lista de acertos de centralina." },
+      { title: "Jobs — Remap Garage" },
+      { name: "description", content: "All ECU tuning jobs." },
+      { property: "og:title", content: "Jobs — Remap Garage" },
+      { property: "og:description", content: "All ECU tuning jobs." },
     ],
   }),
   loader: ({ context }) => context.queryClient.ensureQueryData(jobsQuery()),
@@ -38,24 +38,24 @@ function JobsList() {
     <div>
       <div className="mb-6 flex items-end justify-between gap-4">
         <div>
-          <h1 className="text-5xl">Trabalhos</h1>
+          <h1 className="text-5xl">Jobs</h1>
           <p className="text-sm text-muted-foreground">
-            {jobs.length} carros · +{Math.round(totalHp)} cv no total
+            {jobs.length} cars · +{Math.round(totalHp)} hp gained in total
           </p>
         </div>
         <Button asChild className="shadow-glow">
-          <Link to="/trabalhos/novo"><Plus /> Novo</Link>
+          <Link to="/trabalhos/novo"><Plus /> New</Link>
         </Button>
       </div>
 
       <div className="relative mb-4">
         <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-        <Input className="pl-9" placeholder="Procurar matrícula, carro ou cliente…" value={q} onChange={(e) => setQ(e.target.value)} />
+        <Input className="pl-9" placeholder="Search plate, car or client…" value={q} onChange={(e) => setQ(e.target.value)} />
       </div>
 
       {filtered.length === 0 ? (
         <div className="rounded-xl border border-dashed p-10 text-center text-muted-foreground">
-          {jobs.length === 0 ? "Ainda não há trabalhos. Regista o primeiro carro!" : "Nada encontrado."}
+          {jobs.length === 0 ? "No jobs yet. Add your first car!" : "Nothing found."}
         </div>
       ) : (
         <ul className="space-y-2">
@@ -72,6 +72,7 @@ function JobsList() {
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="font-semibold">{j.brand} {j.model}</span>
                       <Badge variant="secondary">{j.stage}</Badge>
+                      <Badge variant={j.status === "done" ? "outline" : "default"}>{STATUSES[j.status as Status] ?? j.status}</Badge>
                     </div>
                     <div className="truncate text-sm text-muted-foreground">
                       {[j.plate, j.engine, j.client_name].filter(Boolean).join(" · ")}

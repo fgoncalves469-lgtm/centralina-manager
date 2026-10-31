@@ -80,8 +80,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Remap Garage — Gestão de reprogramações" },
-      { name: "description", content: "Gestão de acertos de centralina: carros, clientes, potência e ficheiros." },
+      { title: "Remap Garage — ECU tuning manager" },
+      { name: "description", content: "Manage ECU tuning jobs: cars, clients, power figures, map files and logs." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:site", content: "@Lovable" },
@@ -108,7 +108,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="pt">
+    <html lang="en">
       <head>
         <HeadContent />
       </head>
