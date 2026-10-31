@@ -14,7 +14,107 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      job_files: {
+        Row: {
+          created_at: string
+          file_name: string
+          id: string
+          job_id: string
+          kind: string
+          path: string
+          size: number | null
+          uploaded_by: string
+        }
+        Insert: {
+          created_at?: string
+          file_name: string
+          id?: string
+          job_id: string
+          kind?: string
+          path: string
+          size?: number | null
+          uploaded_by?: string
+        }
+        Update: {
+          created_at?: string
+          file_name?: string
+          id?: string
+          job_id?: string
+          kind?: string
+          path?: string
+          size?: number | null
+          uploaded_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_files_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      jobs: {
+        Row: {
+          brand: string
+          client_name: string
+          client_phone: string | null
+          created_at: string
+          created_by: string
+          ecu: string | null
+          engine: string | null
+          hp_after: number | null
+          hp_before: number | null
+          id: string
+          model: string
+          nm_after: number | null
+          nm_before: number | null
+          notes: string | null
+          plate: string | null
+          stage: string
+          year: number | null
+        }
+        Insert: {
+          brand?: string
+          client_name?: string
+          client_phone?: string | null
+          created_at?: string
+          created_by?: string
+          ecu?: string | null
+          engine?: string | null
+          hp_after?: number | null
+          hp_before?: number | null
+          id?: string
+          model?: string
+          nm_after?: number | null
+          nm_before?: number | null
+          notes?: string | null
+          plate?: string | null
+          stage?: string
+          year?: number | null
+        }
+        Update: {
+          brand?: string
+          client_name?: string
+          client_phone?: string | null
+          created_at?: string
+          created_by?: string
+          ecu?: string | null
+          engine?: string | null
+          hp_after?: number | null
+          hp_before?: number | null
+          id?: string
+          model?: string
+          nm_after?: number | null
+          nm_before?: number | null
+          notes?: string | null
+          plate?: string | null
+          stage?: string
+          year?: number | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

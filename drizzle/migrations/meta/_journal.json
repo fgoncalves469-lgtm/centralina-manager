@@ -1,5 +1,13 @@
 {
   "version": "7",
   "dialect": "postgresql",
-  "entries": []
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1793408877773,
+      "tag": "0000_create_tuning_jobs",
+      "breakpoints": true
+    }
+  ]
 }
