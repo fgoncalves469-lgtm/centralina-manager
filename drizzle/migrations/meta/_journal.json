@@ -15,6 +15,13 @@
       "when": 1793409308374,
       "tag": "0001_file_notes_logs_status",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793574375520,
+      "tag": "0002_user_roles_and_assignments",
+      "breakpoints": true
     }
   ]
 }
