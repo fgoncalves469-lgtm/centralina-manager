@@ -5,7 +5,7 @@ import { Plus, Search, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { gainPercent, jobsQuery, STATUSES, type Status } from "@/lib/jobs";
+import { gainPercent, jobsQuery, myRoleQuery, STATUSES, type Status } from "@/lib/jobs";
 
 export const Route = createFileRoute("/_authenticated/trabalhos/")({
   head: () => ({
@@ -16,12 +16,18 @@ export const Route = createFileRoute("/_authenticated/trabalhos/")({
       { property: "og:description", content: "All ECU tuning jobs." },
     ],
   }),
-  loader: ({ context }) => context.queryClient.ensureQueryData(jobsQuery()),
+  loader: ({ context }) =>
+    Promise.all([
+      context.queryClient.ensureQueryData(jobsQuery()),
+      context.queryClient.ensureQueryData(myRoleQuery(context.user.id)),
+    ]),
   component: JobsList,
 });
 
 function JobsList() {
   const { data: jobs } = useSuspenseQuery(jobsQuery());
+  const { user } = Route.useRouteContext();
+  const { data: role } = useSuspenseQuery(myRoleQuery(user.id));
   const [q, setQ] = useState("");
 
   const filtered = useMemo(() => {
@@ -43,9 +49,11 @@ function JobsList() {
             {jobs.length} cars · +{Math.round(totalHp)} hp gained in total
           </p>
         </div>
-        <Button asChild className="shadow-glow">
-          <Link to="/trabalhos/novo"><Plus /> New</Link>
-        </Button>
+        {role !== "viewer" && (
+          <Button asChild className="shadow-glow">
+            <Link to="/trabalhos/novo"><Plus /> New</Link>
+          </Button>
+        )}
       </div>
 
       <div className="relative mb-4">
