@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { JobForm } from "@/components/JobForm";
 import { FileTimeline } from "@/components/FileTimeline";
-import { gainPercent, jobFilesQuery, jobQuery, STATUSES, type JobInsert, type Status } from "@/lib/jobs";
+import { assigneesQuery, canEditJob, gainPercent, jobFilesQuery, jobQuery, myRoleQuery, ROLES, STATUSES, teamQuery, type JobInsert, type Status } from "@/lib/jobs";
 
 export const Route = createFileRoute("/_authenticated/trabalhos/$id")({
   head: () => ({
@@ -27,7 +27,12 @@ export const Route = createFileRoute("/_authenticated/trabalhos/$id")({
   loader: async ({ context, params }) => {
     const job = await context.queryClient.ensureQueryData(jobQuery(params.id));
     if (!job) throw notFound();
-    await context.queryClient.ensureQueryData(jobFilesQuery(params.id));
+    await Promise.all([
+      context.queryClient.ensureQueryData(jobFilesQuery(params.id)),
+      context.queryClient.ensureQueryData(assigneesQuery(params.id)),
+      context.queryClient.ensureQueryData(myRoleQuery(context.user.id)),
+      context.queryClient.ensureQueryData(teamQuery()),
+    ]);
   },
   component: JobDetail,
 });
@@ -50,6 +55,10 @@ function JobDetail() {
   const { id } = Route.useParams();
   const { data: job } = useSuspenseQuery(jobQuery(id));
   const { data: files } = useSuspenseQuery(jobFilesQuery(id));
+  const { user } = Route.useRouteContext();
+  const { data: role } = useSuspenseQuery(myRoleQuery(user.id));
+  const { data: assignees } = useSuspenseQuery(assigneesQuery(id));
+  const { data: team } = useSuspenseQuery(teamQuery());
   const qc = useQueryClient();
   const navigate = useNavigate();
   const [editing, setEditing] = useState(false);
@@ -83,6 +92,16 @@ function JobDetail() {
   });
 
   if (!job) return null;
+  const canEdit = canEditJob(role, user.id, job, assignees);
+  const isAdmin = role === "admin";
+
+  async function toggleAssignee(userId: string, on: boolean) {
+    const { error } = on
+      ? await supabase.from("job_assignees").insert({ job_id: id, user_id: userId })
+      : await supabase.from("job_assignees").delete().eq("job_id", id).eq("user_id", userId);
+    if (error) return void toast.error("Could not update assignment");
+    qc.invalidateQueries({ queryKey: ["jobs", id, "assignees"] });
+  }
 
   return (
     <div className="mx-auto max-w-3xl">
@@ -107,8 +126,8 @@ function JobDetail() {
               <p className="mt-1 text-muted-foreground">{[job.engine, job.year, job.ecu].filter(Boolean).join(" · ")}</p>
             </div>
             <div className="flex gap-2">
-              <Button variant="outline" size="icon" onClick={() => setEditing(true)} aria-label="Edit"><Pencil /></Button>
-              <AlertDialog>
+              {canEdit && <Button variant="outline" size="icon" onClick={() => setEditing(true)} aria-label="Edit"><Pencil /></Button>}
+              {isAdmin && <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <Button variant="outline" size="icon" aria-label="Delete"><Trash2 /></Button>
                 </AlertDialogTrigger>
@@ -122,18 +141,40 @@ function JobDetail() {
                     <AlertDialogAction onClick={() => remove.mutate()}>Delete</AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
-              </AlertDialog>
+              </AlertDialog>}
             </div>
           </div>
 
           <div className="mb-6 rounded-xl border border-primary/40 bg-card p-4">
             <div className="mb-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground">Status</div>
-            <Select value={job.status} onValueChange={(s) => update.mutate({ status: s })}>
+            <Select disabled={!canEdit} value={job.status} onValueChange={(s) => update.mutate({ status: s })}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
                 {(Object.keys(STATUSES) as Status[]).map((s) => <SelectItem key={s} value={s}>{STATUSES[s]}</SelectItem>)}
               </SelectContent>
             </Select>
+          </div>
+
+          <div className="mb-6 rounded-xl border bg-card p-4">
+            <div className="mb-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground">Assigned contributors</div>
+            {isAdmin ? (
+              <div className="flex flex-wrap gap-2">
+                {team.filter((m) => m.role !== "viewer").map((m) => {
+                  const on = assignees.includes(m.id);
+                  return (
+                    <Button key={m.id} size="sm" variant={on ? "default" : "outline"} onClick={() => toggleAssignee(m.id, !on)}>
+                      {m.email} <span className="text-xs opacity-70">· {ROLES[m.role]}</span>
+                    </Button>
+                  );
+                })}
+                {team.every((m) => m.role === "viewer") && <span className="text-sm text-muted-foreground">No contributors yet — set permissions on the Users page.</span>}
+              </div>
+            ) : (
+              <p className="text-sm">
+                {assignees.length ? team.filter((m) => assignees.includes(m.id)).map((m) => m.email).join(", ") : <span className="text-muted-foreground">Nobody assigned</span>}
+              </p>
+            )}
+            {!canEdit && <p className="mt-2 text-xs text-muted-foreground">You can view this job but not change it.</p>}
           </div>
 
           <div className="mb-6 grid gap-3 sm:grid-cols-2">
@@ -159,7 +200,7 @@ function JobDetail() {
             </div>
           </div>
 
-          <FileTimeline jobId={id} files={files} />
+          <FileTimeline jobId={id} files={files} canEdit={canEdit} />
         </>
       )}
     </div>

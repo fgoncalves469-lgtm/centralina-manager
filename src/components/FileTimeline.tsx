@@ -98,7 +98,7 @@ function UploadDialog({
   );
 }
 
-function FileCard({ jobId, file, version, logs }: { jobId: string; file: JobFile; version: number; logs: FileLog[] }) {
+function FileCard({ jobId, file, version, logs, canEdit }: { jobId: string; file: JobFile; version: number; logs: FileLog[]; canEdit: boolean }) {
   const qc = useQueryClient();
   const [editing, setEditing] = useState(false);
   const [notes, setNotes] = useState(file.notes ?? "");
@@ -161,7 +161,7 @@ function FileCard({ jobId, file, version, logs }: { jobId: string; file: JobFile
             </div>
           </div>
           <Button size="icon" variant="ghost" onClick={() => downloadPath(file.path, file.file_name)} aria-label="Download"><Download /></Button>
-          <Button size="icon" variant="ghost" onClick={deleteFile} aria-label="Delete file"><Trash2 /></Button>
+          {canEdit && <Button size="icon" variant="ghost" onClick={deleteFile} aria-label="Delete file"><Trash2 /></Button>}
         </div>
 
         <div className="mt-3 rounded-lg bg-muted p-3">
@@ -178,9 +178,9 @@ function FileCard({ jobId, file, version, logs }: { jobId: string; file: JobFile
               <p className="flex-1 whitespace-pre-wrap text-sm">
                 {file.notes || <span className="text-muted-foreground">No notes on this version yet.</span>}
               </p>
-              <button onClick={() => setEditing(true)} className="text-muted-foreground hover:text-foreground" aria-label="Edit notes">
+              {canEdit && <button onClick={() => setEditing(true)} className="text-muted-foreground hover:text-foreground" aria-label="Edit notes">
                 <Pencil className="size-4" />
-              </button>
+              </button>}
             </div>
           )}
         </div>
@@ -188,12 +188,12 @@ function FileCard({ jobId, file, version, logs }: { jobId: string; file: JobFile
         <div className="mt-3">
           <div className="mb-2 flex items-center justify-between">
             <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Logs ({logs.length})</span>
-            <UploadDialog
+            {canEdit && <UploadDialog
               title="Add log"
               notePlaceholder="e.g. 3rd gear pull, boost overshoot at 3200 rpm, EGT ok"
               onSubmit={(f, n) => addLog(f, n)}
               trigger={<Button size="sm" variant="outline"><Paperclip /> Add log</Button>}
-            />
+            />}
           </div>
           {logs.length > 0 && (
             <ul className="space-y-2">
@@ -206,7 +206,7 @@ function FileCard({ jobId, file, version, logs }: { jobId: string; file: JobFile
                     {l.note && <p className="mt-1 whitespace-pre-wrap text-sm">{l.note}</p>}
                   </div>
                   <Button size="icon" variant="ghost" onClick={() => downloadPath(l.path, l.file_name)} aria-label="Download log"><Download /></Button>
-                  <Button size="icon" variant="ghost" onClick={() => deleteLog(l)} aria-label="Delete log"><Trash2 /></Button>
+                  {canEdit && <Button size="icon" variant="ghost" onClick={() => deleteLog(l)} aria-label="Delete log"><Trash2 /></Button>}
                 </li>
               ))}
             </ul>
@@ -217,7 +217,7 @@ function FileCard({ jobId, file, version, logs }: { jobId: string; file: JobFile
   );
 }
 
-export function FileTimeline({ jobId, files }: { jobId: string; files: JobFile[] }) {
+export function FileTimeline({ jobId, files, canEdit }: { jobId: string; files: JobFile[]; canEdit: boolean }) {
   const qc = useQueryClient();
   const ids = files.map((f) => f.id);
   const { data: logs = [] } = useQuery(fileLogsQuery(jobId, ids));
@@ -245,13 +245,13 @@ export function FileTimeline({ jobId, files }: { jobId: string; files: JobFile[]
     <section>
       <div className="mb-4 flex items-center justify-between gap-3">
         <h2 className="text-3xl">Files & versions</h2>
-        <UploadDialog
+        {canEdit && <UploadDialog
           title="Upload file"
           kinds
           notePlaceholder="What changed? e.g. v3: boost +0.1 bar mid-range, SOI advanced 1°, torque limiter raised"
           onSubmit={addFile}
           trigger={<Button className="shadow-glow"><Upload /> Upload</Button>}
-        />
+        />}
       </div>
       {files.length === 0 ? (
         <p className="rounded-xl border border-dashed p-8 text-center text-sm text-muted-foreground">
@@ -260,7 +260,7 @@ export function FileTimeline({ jobId, files }: { jobId: string; files: JobFile[]
       ) : (
         <ol className="relative space-y-4 before:absolute before:bottom-0 before:left-3 before:top-0 before:w-px before:bg-border">
           {ordered.map((f, i) => ({ f, v: i + 1 })).reverse().map(({ f, v }) => (
-            <FileCard key={f.id} jobId={jobId} file={f} version={v} logs={logs.filter((l) => l.file_id === f.id)} />
+            <FileCard key={f.id} jobId={jobId} file={f} version={v} logs={logs.filter((l) => l.file_id === f.id)} canEdit={canEdit} />
           ))}
         </ol>
       )}

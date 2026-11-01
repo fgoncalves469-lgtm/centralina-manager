@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedUtilizadoresRouteImport } from './routes/_authenticated/utilizadores'
 import { Route as AuthenticatedTrabalhosIndexRouteImport } from './routes/_authenticated/trabalhos/index'
 import { Route as AuthenticatedTrabalhosIdRouteImport } from './routes/_authenticated/trabalhos/$id'
 import { Route as AuthenticatedTrabalhosNovoRouteImport } from './routes/_authenticated/trabalhos/novo'
@@ -30,6 +31,12 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedUtilizadoresRoute =
+  AuthenticatedUtilizadoresRouteImport.update({
+    id: '/utilizadores',
+    path: '/utilizadores',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedTrabalhosIndexRoute =
   AuthenticatedTrabalhosIndexRouteImport.update({
     id: '/trabalhos/',
@@ -52,6 +59,7 @@ const AuthenticatedTrabalhosNovoRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/utilizadores': typeof AuthenticatedUtilizadoresRoute
   '/trabalhos/$id': typeof AuthenticatedTrabalhosIdRoute
   '/trabalhos/novo': typeof AuthenticatedTrabalhosNovoRoute
   '/trabalhos/': typeof AuthenticatedTrabalhosIndexRoute
@@ -59,6 +67,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/utilizadores': typeof AuthenticatedUtilizadoresRoute
   '/trabalhos/$id': typeof AuthenticatedTrabalhosIdRoute
   '/trabalhos/novo': typeof AuthenticatedTrabalhosNovoRoute
   '/trabalhos': typeof AuthenticatedTrabalhosIndexRoute
@@ -68,6 +77,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/_authenticated/utilizadores': typeof AuthenticatedUtilizadoresRoute
   '/_authenticated/trabalhos/$id': typeof AuthenticatedTrabalhosIdRoute
   '/_authenticated/trabalhos/novo': typeof AuthenticatedTrabalhosNovoRoute
   '/_authenticated/trabalhos/': typeof AuthenticatedTrabalhosIndexRoute
@@ -75,14 +85,26 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/auth' | '/trabalhos/$id' | '/trabalhos/novo' | '/trabalhos/'
+    | '/'
+    | '/auth'
+    | '/utilizadores'
+    | '/trabalhos/$id'
+    | '/trabalhos/novo'
+    | '/trabalhos/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/trabalhos/$id' | '/trabalhos/novo' | '/trabalhos'
+  to:
+    | '/'
+    | '/auth'
+    | '/utilizadores'
+    | '/trabalhos/$id'
+    | '/trabalhos/novo'
+    | '/trabalhos'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/_authenticated/utilizadores'
     | '/_authenticated/trabalhos/$id'
     | '/_authenticated/trabalhos/novo'
     | '/_authenticated/trabalhos/'
@@ -117,6 +139,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/utilizadores': {
+      id: '/_authenticated/utilizadores'
+      path: '/utilizadores'
+      fullPath: '/utilizadores'
+      preLoaderRoute: typeof AuthenticatedUtilizadoresRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/trabalhos/': {
       id: '/_authenticated/trabalhos/'
       path: '/trabalhos'
@@ -142,12 +171,14 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedUtilizadoresRoute: typeof AuthenticatedUtilizadoresRoute
   AuthenticatedTrabalhosIdRoute: typeof AuthenticatedTrabalhosIdRoute
   AuthenticatedTrabalhosNovoRoute: typeof AuthenticatedTrabalhosNovoRoute
   AuthenticatedTrabalhosIndexRoute: typeof AuthenticatedTrabalhosIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedUtilizadoresRoute: AuthenticatedUtilizadoresRoute,
   AuthenticatedTrabalhosIdRoute: AuthenticatedTrabalhosIdRoute,
   AuthenticatedTrabalhosNovoRoute: AuthenticatedTrabalhosNovoRoute,
   AuthenticatedTrabalhosIndexRoute: AuthenticatedTrabalhosIndexRoute,

@@ -1,6 +1,6 @@
 import { createFileRoute, Outlet, redirect, Link, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { LogOut } from "lucide-react";
+import { LogOut, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 
@@ -34,6 +34,9 @@ function AppLayout() {
             REMAP<span className="text-primary">GARAGE</span>
           </Link>
           <div className="flex items-center gap-2">
+            <Button variant="ghost" size="icon" asChild aria-label="Users">
+              <Link to="/utilizadores"><Users /></Link>
+            </Button>
             <span className="hidden text-sm text-muted-foreground sm:inline">{user.email}</span>
             <Button variant="ghost" size="icon" onClick={signOut} aria-label="Sign out">
               <LogOut />
