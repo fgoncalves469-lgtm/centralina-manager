@@ -79,3 +79,54 @@ export function gainPercent(before: number | null, after: number | null): number
   if (before == null || after == null || before <= 0) return null;
   return Math.round(((after - before) / before) * 100);
 }
+
+export type Role = Database["public"]["Enums"]["app_role"];
+export const ROLES: Record<Role, string> = {
+  admin: "Admin",
+  contributor: "Contributor",
+  viewer: "View only",
+};
+
+/** Can this user edit a job? Admin: always. Contributor: if assigned or creator. Viewer: never. */
+export function canEditJob(role: Role | null | undefined, userId: string, job: { created_by: string }, assigneeIds: string[]) {
+  if (role === "admin") return true;
+  if (role === "contributor") return job.created_by === userId || assigneeIds.includes(userId);
+  return false;
+}
+
+export const myRoleQuery = (userId: string) =>
+  queryOptions({
+    queryKey: ["role", userId],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("user_roles").select("role").eq("user_id", userId).maybeSingle();
+      if (error) throw error;
+      return (data?.role ?? "viewer") as Role;
+    },
+  });
+
+export const teamQuery = () =>
+  queryOptions({
+    queryKey: ["team"],
+    queryFn: async () => {
+      const [{ data: profiles, error: e1 }, { data: roles, error: e2 }] = await Promise.all([
+        supabase.from("profiles").select("*").order("created_at"),
+        supabase.from("user_roles").select("user_id, role"),
+      ]);
+      if (e1) throw e1;
+      if (e2) throw e2;
+      return (profiles ?? []).map((p) => ({
+        ...p,
+        role: (roles?.find((r) => r.user_id === p.id)?.role ?? "viewer") as Role,
+      }));
+    },
+  });
+
+export const assigneesQuery = (jobId: string) =>
+  queryOptions({
+    queryKey: ["jobs", jobId, "assignees"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("job_assignees").select("user_id").eq("job_id", jobId);
+      if (error) throw error;
+      return (data ?? []).map((a) => a.user_id);
+    },
+  });
