@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedEcuDatabaseRouteImport } from './routes/_authenticated/ecu-database'
 import { Route as AuthenticatedUtilizadoresRouteImport } from './routes/_authenticated/utilizadores'
 import { Route as AuthenticatedTrabalhosIndexRouteImport } from './routes/_authenticated/trabalhos/index'
 import { Route as AuthenticatedTrabalhosIdRouteImport } from './routes/_authenticated/trabalhos/$id'
@@ -31,6 +32,12 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedEcuDatabaseRoute =
+  AuthenticatedEcuDatabaseRouteImport.update({
+    id: '/ecu-database',
+    path: '/ecu-database',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedUtilizadoresRoute =
   AuthenticatedUtilizadoresRouteImport.update({
     id: '/utilizadores',
@@ -59,6 +66,7 @@ const AuthenticatedTrabalhosNovoRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/ecu-database': typeof AuthenticatedEcuDatabaseRoute
   '/utilizadores': typeof AuthenticatedUtilizadoresRoute
   '/trabalhos/$id': typeof AuthenticatedTrabalhosIdRoute
   '/trabalhos/novo': typeof AuthenticatedTrabalhosNovoRoute
@@ -67,6 +75,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/ecu-database': typeof AuthenticatedEcuDatabaseRoute
   '/utilizadores': typeof AuthenticatedUtilizadoresRoute
   '/trabalhos/$id': typeof AuthenticatedTrabalhosIdRoute
   '/trabalhos/novo': typeof AuthenticatedTrabalhosNovoRoute
@@ -77,6 +86,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/_authenticated/ecu-database': typeof AuthenticatedEcuDatabaseRoute
   '/_authenticated/utilizadores': typeof AuthenticatedUtilizadoresRoute
   '/_authenticated/trabalhos/$id': typeof AuthenticatedTrabalhosIdRoute
   '/_authenticated/trabalhos/novo': typeof AuthenticatedTrabalhosNovoRoute
@@ -87,6 +97,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/ecu-database'
     | '/utilizadores'
     | '/trabalhos/$id'
     | '/trabalhos/novo'
@@ -95,6 +106,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/ecu-database'
     | '/utilizadores'
     | '/trabalhos/$id'
     | '/trabalhos/novo'
@@ -104,6 +116,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/_authenticated/ecu-database'
     | '/_authenticated/utilizadores'
     | '/_authenticated/trabalhos/$id'
     | '/_authenticated/trabalhos/novo'
@@ -139,6 +152,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/ecu-database': {
+      id: '/_authenticated/ecu-database'
+      path: '/ecu-database'
+      fullPath: '/ecu-database'
+      preLoaderRoute: typeof AuthenticatedEcuDatabaseRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/utilizadores': {
       id: '/_authenticated/utilizadores'
       path: '/utilizadores'
@@ -171,6 +191,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedEcuDatabaseRoute: typeof AuthenticatedEcuDatabaseRoute
   AuthenticatedUtilizadoresRoute: typeof AuthenticatedUtilizadoresRoute
   AuthenticatedTrabalhosIdRoute: typeof AuthenticatedTrabalhosIdRoute
   AuthenticatedTrabalhosNovoRoute: typeof AuthenticatedTrabalhosNovoRoute
@@ -178,6 +199,7 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedEcuDatabaseRoute: AuthenticatedEcuDatabaseRoute,
   AuthenticatedUtilizadoresRoute: AuthenticatedUtilizadoresRoute,
   AuthenticatedTrabalhosIdRoute: AuthenticatedTrabalhosIdRoute,
   AuthenticatedTrabalhosNovoRoute: AuthenticatedTrabalhosNovoRoute,

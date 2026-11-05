@@ -130,3 +130,37 @@ export const assigneesQuery = (jobId: string) =>
       return (data ?? []).map((a) => a.user_id);
     },
   });
+
+export type Vehicle = Database["public"]["Tables"]["vehicles"]["Row"];
+
+export const vehiclesQuery = () =>
+  queryOptions({
+    queryKey: ["vehicles"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("vehicles")
+        .select("*")
+        .order("brand")
+        .order("model")
+        .order("engine");
+      if (error) throw error;
+      return data;
+    },
+  });
+
+/** Text stored on a job for a vehicle row, e.g. "1.6 16V (TU5JP4)". */
+export function engineLabel(v: Pick<Vehicle, "engine" | "engine_code">) {
+  return v.engine_code ? `${v.engine} (${v.engine_code})` : v.engine;
+}
+
+/** Split a typed ECU list ("IAW 1AP / 48P2") into separate entries. */
+export function parseEcus(text: string) {
+  return text.split(/[\/,]/).map((s) => s.trim()).filter(Boolean);
+}
+
+/** Search a vehicle row by model, engine, engine code or ECU. */
+export function matchesVehicle(v: Vehicle, q: string) {
+  const s = q.trim().toLowerCase();
+  if (!s) return true;
+  return [v.brand, v.model, v.engine, v.engine_code ?? "", ...v.ecus].some((x) => x.toLowerCase().includes(s));
+}

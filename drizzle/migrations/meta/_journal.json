@@ -22,6 +22,13 @@
       "when": 1793574375520,
       "tag": "0002_user_roles_and_assignments",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1793889446767,
+      "tag": "0003_vehicles_ecu_database",
+      "breakpoints": true
     }
   ]
 }

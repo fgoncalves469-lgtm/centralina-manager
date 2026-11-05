@@ -230,6 +230,42 @@ export type Database = {
         }
         Relationships: []
       }
+      vehicles: {
+        Row: {
+          brand: string
+          created_at: string
+          displacement: number | null
+          ecus: string[]
+          engine: string
+          engine_code: string | null
+          id: string
+          model: string
+          power_hp: number | null
+        }
+        Insert: {
+          brand: string
+          created_at?: string
+          displacement?: number | null
+          ecus?: string[]
+          engine: string
+          engine_code?: string | null
+          id?: string
+          model: string
+          power_hp?: number | null
+        }
+        Update: {
+          brand?: string
+          created_at?: string
+          displacement?: number | null
+          ecus?: string[]
+          engine?: string
+          engine_code?: string | null
+          id?: string
+          model?: string
+          power_hp?: number | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
