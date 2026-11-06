@@ -48,7 +48,7 @@ export function JobForm({ initial = {}, submitLabel, busy, onSubmit }: Props) {
 
   function pickEngine(label: string) {
     const row = inModel.find((x) => engineLabel(x) === label);
-    setV({ ...v, engine: label, ecu: row && row.ecus.length === 1 ? row.ecus[0] : row ? "" : v.ecu });
+    setV({ ...v, engine: label, ecu: row && row.ecus.length === 1 ? (row.ecus[0] ?? "") : row ? "" : v.ecu });
   }
 
   function submit(e: React.FormEvent) {
