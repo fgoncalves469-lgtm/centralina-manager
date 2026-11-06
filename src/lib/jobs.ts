@@ -164,3 +164,59 @@ export function matchesVehicle(v: Vehicle, q: string) {
   if (!s) return true;
   return [v.brand, v.model, v.engine, v.engine_code ?? "", ...v.ecus].some((x) => x.toLowerCase().includes(s));
 }
+
+export type Car = Database["public"]["Tables"]["cars"]["Row"];
+export type CarInsert = Database["public"]["Tables"]["cars"]["Insert"];
+
+export const isEditorRole = (role: Role | null | undefined) => role === "admin" || role === "contributor";
+
+/** Can delete a car: only admin and contributors (owners cannot). */
+export const canDeleteCar = (role: Role | null | undefined) => isEditorRole(role);
+
+/** Can edit a car's details: editors, or the car's owner. */
+export function canEditCar(role: Role | null | undefined, userId: string, car: Pick<Car, "owner_id">) {
+  return isEditorRole(role) || car.owner_id === userId;
+}
+
+/** Top navigation tabs. Add new sections here; `roles` limits who sees each one. */
+export const NAV_TABS: { to: "/trabalhos" | "/garage" | "/ecu-database" | "/utilizadores"; label: string; roles: Role[] }[] = [
+  { to: "/trabalhos", label: "Jobs", roles: ["admin", "contributor"] },
+  { to: "/garage", label: "My Garage", roles: ["admin", "contributor", "viewer"] },
+  { to: "/ecu-database", label: "ECU Database", roles: ["admin", "contributor"] },
+  { to: "/utilizadores", label: "Users", roles: ["admin"] },
+];
+export const tabsFor = (role: Role) => NAV_TABS.filter((t) => t.roles.includes(role));
+
+export const carsQuery = () =>
+  queryOptions({
+    queryKey: ["cars"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("cars").select("*").order("created_at", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+
+export const carQuery = (id: string) =>
+  queryOptions({
+    queryKey: ["cars", id],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("cars").select("*").eq("id", id).maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+  });
+
+export const carJobsQuery = (carId: string) =>
+  queryOptions({
+    queryKey: ["cars", carId, "jobs"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("jobs")
+        .select("id, created_at, stage, status, hp_before, hp_after, nm_before, nm_after, ecu")
+        .eq("car_id", carId)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });

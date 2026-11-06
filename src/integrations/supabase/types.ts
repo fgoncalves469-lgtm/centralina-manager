@@ -14,6 +14,63 @@ export type Database = {
   }
   public: {
     Tables: {
+      cars: {
+        Row: {
+          brand: string
+          color: string | null
+          created_at: string
+          created_by: string
+          ecu: string | null
+          engine: string | null
+          fuel: string | null
+          gearbox: string | null
+          id: string
+          mileage: number | null
+          model: string
+          notes: string | null
+          owner_id: string | null
+          plate: string | null
+          vin: string | null
+          year: number | null
+        }
+        Insert: {
+          brand?: string
+          color?: string | null
+          created_at?: string
+          created_by?: string
+          ecu?: string | null
+          engine?: string | null
+          fuel?: string | null
+          gearbox?: string | null
+          id?: string
+          mileage?: number | null
+          model?: string
+          notes?: string | null
+          owner_id?: string | null
+          plate?: string | null
+          vin?: string | null
+          year?: number | null
+        }
+        Update: {
+          brand?: string
+          color?: string | null
+          created_at?: string
+          created_by?: string
+          ecu?: string | null
+          engine?: string | null
+          fuel?: string | null
+          gearbox?: string | null
+          id?: string
+          mileage?: number | null
+          model?: string
+          notes?: string | null
+          owner_id?: string | null
+          plate?: string | null
+          vin?: string | null
+          year?: number | null
+        }
+        Relationships: []
+      }
       file_logs: {
         Row: {
           created_at: string
@@ -134,6 +191,7 @@ export type Database = {
       jobs: {
         Row: {
           brand: string
+          car_id: string | null
           client_name: string
           client_phone: string | null
           created_at: string
@@ -154,6 +212,7 @@ export type Database = {
         }
         Insert: {
           brand?: string
+          car_id?: string | null
           client_name?: string
           client_phone?: string | null
           created_at?: string
@@ -174,6 +233,7 @@ export type Database = {
         }
         Update: {
           brand?: string
+          car_id?: string | null
           client_name?: string
           client_phone?: string | null
           created_at?: string
@@ -192,7 +252,15 @@ export type Database = {
           status?: string
           year?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "jobs_car_id_fkey"
+            columns: ["car_id"]
+            isOneToOne: false
+            referencedRelation: "cars"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -280,6 +348,8 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_editor: { Args: { _user_id: string }; Returns: boolean }
+      owns_job: { Args: { _job_id: string }; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "contributor" | "viewer"
