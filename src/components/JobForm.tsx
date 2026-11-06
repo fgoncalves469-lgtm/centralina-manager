@@ -4,7 +4,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { STAGES, type Job, type JobInsert } from "@/lib/jobs";
+import { useQuery } from "@tanstack/react-query";
+import { PickOrType } from "@/components/PickOrType";
+import { engineLabel, STAGES, vehiclesQuery, type Job, type JobInsert } from "@/lib/jobs";
 
 type Props = {
   initial?: Partial<Job>;
@@ -34,6 +36,20 @@ export function JobForm({ initial = {}, submitLabel, busy, onSubmit }: Props) {
   });
   const set = (k: keyof typeof v) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     setV({ ...v, [k]: e.target.value });
+
+  const { data: vehicles = [] } = useQuery(vehiclesQuery());
+  const uniq = (a: string[]) => [...new Set(a)];
+  const brands = uniq(vehicles.map((x) => x.brand));
+  const inModel = vehicles.filter((x) => x.brand === v.brand && x.model === v.model);
+  const models = uniq(vehicles.filter((x) => x.brand === v.brand).map((x) => x.model));
+  const engines = uniq(inModel.map(engineLabel));
+  const chosen = inModel.find((x) => engineLabel(x) === v.engine);
+  const ecus = chosen?.ecus ?? uniq(inModel.flatMap((x) => x.ecus));
+
+  function pickEngine(label: string) {
+    const row = inModel.find((x) => engineLabel(x) === label);
+    setV({ ...v, engine: label, ecu: row && row.ecus.length === 1 ? (row.ecus[0] ?? "") : row ? "" : v.ecu });
+  }
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -67,12 +83,14 @@ export function JobForm({ initial = {}, submitLabel, busy, onSubmit }: Props) {
       <section className="rounded-xl border bg-card p-5">
         <h2 className="mb-4 text-2xl">Car</h2>
         <div className="grid gap-4 sm:grid-cols-2">
-          {field("brand", "Make", { required: true, placeholder: "BMW" })}
-          {field("model", "Model", { required: true, placeholder: "320d F30" })}
-          {field("engine", "Engine", { placeholder: "2.0 TDI 150hp" })}
+          <PickOrType id="brand" label="Make" required value={v.brand} options={brands}
+            onChange={(b) => setV({ ...v, brand: b, model: "", engine: "", ecu: "" })} />
+          <PickOrType id="model" label="Model" required value={v.model} options={models}
+            onChange={(m) => setV({ ...v, model: m, engine: "", ecu: "" })} />
+          <PickOrType id="engine" label="Engine" value={v.engine} options={engines} onChange={pickEngine} />
           {field("year", "Year", { inputMode: "numeric", placeholder: "2018" })}
           {field("plate", "Plate", { placeholder: "AA-00-BB" })}
-          {field("ecu", "ECU", { placeholder: "Bosch EDC17C50" })}
+          <PickOrType id="ecu" label="ECU" value={v.ecu} options={ecus} onChange={(e) => setV({ ...v, ecu: e })} />
         </div>
       </section>
 

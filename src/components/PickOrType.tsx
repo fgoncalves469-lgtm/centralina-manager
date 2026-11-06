@@ -26,7 +26,7 @@ export function PickOrType({ id, label, value, options, onChange, required, plac
       <Label htmlFor={id}>{label}</Label>
       <Select
         value={isTyping ? OTHER : value}
-        disabled={disabled}
+        disabled={!!disabled}
         onValueChange={(s) => {
           if (s === OTHER) { setTyping(true); onChange(""); }
           else { setTyping(false); onChange(s); }
