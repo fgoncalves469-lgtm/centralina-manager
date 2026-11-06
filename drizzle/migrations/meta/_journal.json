@@ -29,6 +29,13 @@
       "when": 1793889446767,
       "tag": "0003_vehicles_ecu_database",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1793959230045,
+      "tag": "0004_my_garage_cars",
+      "breakpoints": true
     }
   ]
 }
