@@ -1,6 +1,6 @@
 import { createFileRoute, Outlet, redirect, Link, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { LogOut, Users } from "lucide-react";
+import { Cpu, LogOut, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 
@@ -34,6 +34,9 @@ function AppLayout() {
             REMAP<span className="text-primary">GARAGE</span>
           </Link>
           <div className="flex items-center gap-2">
+            <Button variant="ghost" size="icon" asChild aria-label="ECU database">
+              <Link to="/ecu-database"><Cpu /></Link>
+            </Button>
             <Button variant="ghost" size="icon" asChild aria-label="Users">
               <Link to="/utilizadores"><Users /></Link>
             </Button>
