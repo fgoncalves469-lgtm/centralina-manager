@@ -14,6 +14,9 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedEcuDatabaseRouteImport } from './routes/_authenticated/ecu-database'
 import { Route as AuthenticatedUtilizadoresRouteImport } from './routes/_authenticated/utilizadores'
+import { Route as AuthenticatedGarageIndexRouteImport } from './routes/_authenticated/garage/index'
+import { Route as AuthenticatedGarageIdRouteImport } from './routes/_authenticated/garage/$id'
+import { Route as AuthenticatedGarageNovoRouteImport } from './routes/_authenticated/garage/novo'
 import { Route as AuthenticatedTrabalhosIndexRouteImport } from './routes/_authenticated/trabalhos/index'
 import { Route as AuthenticatedTrabalhosIdRouteImport } from './routes/_authenticated/trabalhos/$id'
 import { Route as AuthenticatedTrabalhosNovoRouteImport } from './routes/_authenticated/trabalhos/novo'
@@ -44,6 +47,22 @@ const AuthenticatedUtilizadoresRoute =
     path: '/utilizadores',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedGarageIndexRoute =
+  AuthenticatedGarageIndexRouteImport.update({
+    id: '/garage/',
+    path: '/garage/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedGarageIdRoute = AuthenticatedGarageIdRouteImport.update({
+  id: '/garage/$id',
+  path: '/garage/$id',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedGarageNovoRoute = AuthenticatedGarageNovoRouteImport.update({
+  id: '/garage/novo',
+  path: '/garage/novo',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedTrabalhosIndexRoute =
   AuthenticatedTrabalhosIndexRouteImport.update({
     id: '/trabalhos/',
@@ -68,8 +87,11 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/ecu-database': typeof AuthenticatedEcuDatabaseRoute
   '/utilizadores': typeof AuthenticatedUtilizadoresRoute
+  '/garage/$id': typeof AuthenticatedGarageIdRoute
+  '/garage/novo': typeof AuthenticatedGarageNovoRoute
   '/trabalhos/$id': typeof AuthenticatedTrabalhosIdRoute
   '/trabalhos/novo': typeof AuthenticatedTrabalhosNovoRoute
+  '/garage/': typeof AuthenticatedGarageIndexRoute
   '/trabalhos/': typeof AuthenticatedTrabalhosIndexRoute
 }
 export interface FileRoutesByTo {
@@ -77,8 +99,11 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/ecu-database': typeof AuthenticatedEcuDatabaseRoute
   '/utilizadores': typeof AuthenticatedUtilizadoresRoute
+  '/garage/$id': typeof AuthenticatedGarageIdRoute
+  '/garage/novo': typeof AuthenticatedGarageNovoRoute
   '/trabalhos/$id': typeof AuthenticatedTrabalhosIdRoute
   '/trabalhos/novo': typeof AuthenticatedTrabalhosNovoRoute
+  '/garage': typeof AuthenticatedGarageIndexRoute
   '/trabalhos': typeof AuthenticatedTrabalhosIndexRoute
 }
 export interface FileRoutesById {
@@ -88,8 +113,11 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/_authenticated/ecu-database': typeof AuthenticatedEcuDatabaseRoute
   '/_authenticated/utilizadores': typeof AuthenticatedUtilizadoresRoute
+  '/_authenticated/garage/$id': typeof AuthenticatedGarageIdRoute
+  '/_authenticated/garage/novo': typeof AuthenticatedGarageNovoRoute
   '/_authenticated/trabalhos/$id': typeof AuthenticatedTrabalhosIdRoute
   '/_authenticated/trabalhos/novo': typeof AuthenticatedTrabalhosNovoRoute
+  '/_authenticated/garage/': typeof AuthenticatedGarageIndexRoute
   '/_authenticated/trabalhos/': typeof AuthenticatedTrabalhosIndexRoute
 }
 export interface FileRouteTypes {
@@ -99,8 +127,11 @@ export interface FileRouteTypes {
     | '/auth'
     | '/ecu-database'
     | '/utilizadores'
+    | '/garage/$id'
+    | '/garage/novo'
     | '/trabalhos/$id'
     | '/trabalhos/novo'
+    | '/garage/'
     | '/trabalhos/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -108,8 +139,11 @@ export interface FileRouteTypes {
     | '/auth'
     | '/ecu-database'
     | '/utilizadores'
+    | '/garage/$id'
+    | '/garage/novo'
     | '/trabalhos/$id'
     | '/trabalhos/novo'
+    | '/garage'
     | '/trabalhos'
   id:
     | '__root__'
@@ -118,8 +152,11 @@ export interface FileRouteTypes {
     | '/auth'
     | '/_authenticated/ecu-database'
     | '/_authenticated/utilizadores'
+    | '/_authenticated/garage/$id'
+    | '/_authenticated/garage/novo'
     | '/_authenticated/trabalhos/$id'
     | '/_authenticated/trabalhos/novo'
+    | '/_authenticated/garage/'
     | '/_authenticated/trabalhos/'
   fileRoutesById: FileRoutesById
 }
@@ -166,6 +203,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedUtilizadoresRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/garage/': {
+      id: '/_authenticated/garage/'
+      path: '/garage'
+      fullPath: '/garage/'
+      preLoaderRoute: typeof AuthenticatedGarageIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/garage/$id': {
+      id: '/_authenticated/garage/$id'
+      path: '/garage/$id'
+      fullPath: '/garage/$id'
+      preLoaderRoute: typeof AuthenticatedGarageIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/garage/novo': {
+      id: '/_authenticated/garage/novo'
+      path: '/garage/novo'
+      fullPath: '/garage/novo'
+      preLoaderRoute: typeof AuthenticatedGarageNovoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/trabalhos/': {
       id: '/_authenticated/trabalhos/'
       path: '/trabalhos'
@@ -193,16 +251,22 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedEcuDatabaseRoute: typeof AuthenticatedEcuDatabaseRoute
   AuthenticatedUtilizadoresRoute: typeof AuthenticatedUtilizadoresRoute
+  AuthenticatedGarageIdRoute: typeof AuthenticatedGarageIdRoute
+  AuthenticatedGarageNovoRoute: typeof AuthenticatedGarageNovoRoute
   AuthenticatedTrabalhosIdRoute: typeof AuthenticatedTrabalhosIdRoute
   AuthenticatedTrabalhosNovoRoute: typeof AuthenticatedTrabalhosNovoRoute
+  AuthenticatedGarageIndexRoute: typeof AuthenticatedGarageIndexRoute
   AuthenticatedTrabalhosIndexRoute: typeof AuthenticatedTrabalhosIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedEcuDatabaseRoute: AuthenticatedEcuDatabaseRoute,
   AuthenticatedUtilizadoresRoute: AuthenticatedUtilizadoresRoute,
+  AuthenticatedGarageIdRoute: AuthenticatedGarageIdRoute,
+  AuthenticatedGarageNovoRoute: AuthenticatedGarageNovoRoute,
   AuthenticatedTrabalhosIdRoute: AuthenticatedTrabalhosIdRoute,
   AuthenticatedTrabalhosNovoRoute: AuthenticatedTrabalhosNovoRoute,
+  AuthenticatedGarageIndexRoute: AuthenticatedGarageIndexRoute,
   AuthenticatedTrabalhosIndexRoute: AuthenticatedTrabalhosIndexRoute,
 }
 
