@@ -10,9 +10,12 @@
 <!-- LOVABLE:END -->
 
 ## Architecture rules
-- Permissions: everyone signed in can read all jobs; writes are gated in RLS by `user_roles` (admin/contributor/viewer) via `can_edit_job()` — admin edits all, contributor edits jobs they created or are assigned to (`job_assignees`), viewer is read-only. The UI mirrors this with `canEditJob()` in `src/lib/jobs.ts`. Why: owner controls who may change each job.
+- Permissions: admin/contributor read all jobs; viewers read only jobs linked (`jobs.car_id`) to cars they own (`cars.owner_id`) and never files/logs; writes are gated in RLS by `user_roles` (admin/contributor/viewer) via `can_edit_job()` — admin edits all, contributor edits jobs they created or are assigned to (`job_assignees`), viewer is read-only. The UI mirrors this with `canEditJob()` in `src/lib/jobs.ts`. Why: owner controls who may change each job.
 - First account to sign up becomes admin; later sign-ups start as viewer. Why: the owner promotes people from the Users page.
 - ECU files live in the private `ecu-files` storage bucket under `<job_id>/...`, indexed by the `job_files` table. Why: downloads stay behind sign-in.
 - App pages live under `src/routes/_authenticated/`; data reads use the browser client with react-query options from `src/lib/jobs.ts`.
 - Logs belong to a specific uploaded file (`file_logs.file_id`), stored under `<job_id>/logs/<file_id>/` in `ecu-files`. Why: each log must be read against the map version it was recorded on.
 - Vehicle/ECU reference list lives in the flat `vehicles` table (one row per engine, `ecus` text[]); job forms suggest from it but always allow free typing via `PickOrType`. Admin and contributors edit it. Why: owner wanted a simple, extendable list without locking jobs to it.
+
+- My Garage: `cars` table; any user creates own car, owner or editors edit, only admin/contributor delete, only admin changes owner (trigger). Why: clients see just their car's summary.
+- Top tabs come from `NAV_TABS` in `src/lib/jobs.ts` with per-role visibility. Why: easy to add new sections.

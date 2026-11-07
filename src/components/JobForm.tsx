@@ -54,6 +54,7 @@ export function JobForm({ initial = {}, submitLabel, busy, onSubmit }: Props) {
   function submit(e: React.FormEvent) {
     e.preventDefault();
     onSubmit({
+      car_id: initial.car_id ?? null,
       client_name: v.client_name.trim(),
       client_phone: v.client_phone || null,
       brand: v.brand.trim(),

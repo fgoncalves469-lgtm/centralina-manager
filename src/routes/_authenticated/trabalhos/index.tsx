@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { Plus, Search, ChevronRight } from "lucide-react";
@@ -16,11 +16,11 @@ export const Route = createFileRoute("/_authenticated/trabalhos/")({
       { property: "og:description", content: "All ECU tuning jobs." },
     ],
   }),
-  loader: ({ context }) =>
-    Promise.all([
-      context.queryClient.ensureQueryData(jobsQuery()),
-      context.queryClient.ensureQueryData(myRoleQuery(context.user.id)),
-    ]),
+  loader: async ({ context }) => {
+    const role = await context.queryClient.ensureQueryData(myRoleQuery(context.user.id));
+    if (role === "viewer") throw redirect({ to: "/garage" });
+    await context.queryClient.ensureQueryData(jobsQuery());
+  },
   component: JobsList,
 });
 
