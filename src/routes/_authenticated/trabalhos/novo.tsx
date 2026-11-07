@@ -16,7 +16,7 @@ export const Route = createFileRoute("/_authenticated/trabalhos/novo")({
       { property: "og:description", content: "Add a new ECU tuning job." },
     ],
   }),
-  validateSearch: (s: Record<string, unknown>): { car?: string } => (typeof s.car === "string" ? { car: s.car } : {}),
+  validateSearch: (s: Record<string, unknown>): { car?: string } => (typeof s["car"] === "string" ? { car: s["car"] } : {}),
   component: NewJob,
 });
 
