@@ -4,7 +4,8 @@ import { ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { JobForm } from "@/components/JobForm";
-import type { JobInsert } from "@/lib/jobs";
+import { useQuery } from "@tanstack/react-query";
+import { carQuery, type JobInsert } from "@/lib/jobs";
 
 export const Route = createFileRoute("/_authenticated/trabalhos/novo")({
   head: () => ({
@@ -15,10 +16,13 @@ export const Route = createFileRoute("/_authenticated/trabalhos/novo")({
       { property: "og:description", content: "Add a new ECU tuning job." },
     ],
   }),
+  validateSearch: (s: Record<string, unknown>): { car?: string } => (typeof s.car === "string" ? { car: s.car } : {}),
   component: NewJob,
 });
 
 function NewJob() {
+  const { car: carId } = Route.useSearch();
+  const { data: car, isLoading } = useQuery({ ...carQuery(carId ?? ""), enabled: !!carId });
   const navigate = useNavigate();
   const qc = useQueryClient();
   const create = useMutation({
@@ -41,7 +45,7 @@ function NewJob() {
         <ArrowLeft className="size-4" /> Jobs
       </Link>
       <h1 className="mb-6 text-5xl">New job</h1>
-      <JobForm submitLabel="Save job" busy={create.isPending} onSubmit={(v) => create.mutate(v)} />
+      {carId && isLoading ? null : <JobForm key={car?.id ?? "new"} initial={car ? { car_id: car.id, brand: car.brand, model: car.model, engine: car.engine, year: car.year, plate: car.plate, ecu: car.ecu } : {}} submitLabel="Save job" busy={create.isPending} onSubmit={(v) => create.mutate(v)} />}
     </div>
   );
 }
