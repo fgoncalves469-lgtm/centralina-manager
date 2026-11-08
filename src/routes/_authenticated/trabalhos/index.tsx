@@ -18,7 +18,7 @@ export const Route = createFileRoute("/_authenticated/trabalhos/")({
   }),
   loader: async ({ context }) => {
     const role = await context.queryClient.ensureQueryData(myRoleQuery(context.user.id));
-    if (role === "viewer") throw redirect({ to: "/garage" });
+    if (role !== "admin") throw redirect({ to: "/garage" });
     await context.queryClient.ensureQueryData(jobsQuery());
   },
   component: JobsList,
@@ -49,7 +49,7 @@ function JobsList() {
             {jobs.length} cars · +{Math.round(totalHp)} hp gained in total
           </p>
         </div>
-        {role !== "viewer" && (
+        {role === "admin" && (
           <Button asChild className="shadow-glow">
             <Link to="/trabalhos/novo"><Plus /> New</Link>
           </Button>

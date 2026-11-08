@@ -6,11 +6,16 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { PickOrType } from "@/components/PickOrType";
 import { engineLabel, vehiclesQuery, type Car, type CarInsert } from "@/lib/jobs";
+import { processPhoto } from '@/lib/photos';
+import { VehiclePhoto } from './VehiclePhoto';
+import { toast } from 'sonner';
 
-type Props = { initial?: Partial<Car>; submitLabel: string; busy?: boolean; onSubmit: (v: CarInsert) => void };
+type Props = { initial?: Partial<Car>; submitLabel: string; busy?: boolean; onSubmit: (v: CarInsert, photo?: Blob | null) => void };
 
 export function CarForm({ initial = {}, submitLabel, busy, onSubmit }: Props) {
   const s = (x: string | number | null | undefined) => (x == null ? "" : String(x));
+  const [photo,setPhoto]=useState<Blob|null|undefined>();
+  const [processing,setProcessing]=useState(false);
   const [v, setV] = useState({
     brand: s(initial.brand), model: s(initial.model), engine: s(initial.engine), year: s(initial.year),
     plate: s(initial.plate), vin: s(initial.vin), ecu: s(initial.ecu), gearbox: s(initial.gearbox),
@@ -37,7 +42,7 @@ export function CarForm({ initial = {}, submitLabel, busy, onSubmit }: Props) {
       brand: v.brand.trim(), model: v.model.trim(), engine: t(v.engine), year: n(v.year),
       plate: v.plate ? v.plate.toUpperCase() : null, vin: v.vin ? v.vin.toUpperCase() : null,
       ecu: t(v.ecu), gearbox: t(v.gearbox), fuel: t(v.fuel), color: t(v.color), mileage: n(v.mileage), notes: t(v.notes),
-    });
+    }, photo);
   }
 
   const field = (k: keyof typeof v, label: string, props: React.ComponentProps<typeof Input> = {}) => (
@@ -49,6 +54,13 @@ export function CarForm({ initial = {}, submitLabel, busy, onSubmit }: Props) {
 
   return (
     <form onSubmit={submit} className="space-y-6">
+      <section className="space-y-3 border-b pb-5">
+        <Label htmlFor="vehicle-photo">Vehicle photo</Label>
+        {photo===undefined && initial.photo_path && <VehiclePhoto path={initial.photo_path} name={`${v.brand} ${v.model}`} compact/>}
+        <Input id="vehicle-photo" type="file" accept="image/jpeg,image/png,image/webp" onChange={async e=>{const f=e.target.files?.[0];if(!f)return;setProcessing(true);try{setPhoto(await processPhoto(f));}catch(err){toast.error(err instanceof Error?err.message:'Could not process photo');}finally{setProcessing(false);}}}/>
+        {photo && <p className="text-sm text-muted-foreground">Photo ready · {Math.round(photo.size/1024)} KB</p>}
+        {(photo || initial.photo_path) && <Button type="button" variant="outline" onClick={()=>setPhoto(null)}>Remove photo</Button>}
+      </section>
       <section className="rounded-xl border bg-card p-5">
         <h2 className="mb-4 text-2xl">Car</h2>
         <div className="grid gap-4 sm:grid-cols-2">
@@ -75,7 +87,7 @@ export function CarForm({ initial = {}, submitLabel, busy, onSubmit }: Props) {
           <Textarea id="notes" rows={3} value={v.notes} onChange={set("notes")} placeholder="Mods, history, anything useful…" />
         </div>
       </section>
-      <Button type="submit" disabled={busy} className="w-full shadow-glow">{submitLabel}</Button>
+      <Button type="submit" disabled={busy || processing} className="w-full shadow-glow">{submitLabel}</Button>
     </form>
   );
 }

@@ -3,6 +3,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { ChevronRight, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { carsQuery, isEditorRole, myRoleQuery, teamQuery } from "@/lib/jobs";
+import { VehiclePhoto } from '@/components/VehiclePhoto';
 
 export const Route = createFileRoute("/_authenticated/garage/")({
   head: () => ({
@@ -54,6 +55,7 @@ function Garage() {
             <li key={c.id}>
               <Link to="/garage/$id" params={{ id: c.id }}
                 className="flex items-center gap-4 rounded-xl border bg-card p-4 transition-colors hover:border-primary">
+                <VehiclePhoto path={c.photo_path} name={`${c.brand} ${c.model}`} compact/>
                 <div className="min-w-0 flex-1">
                   <div className="font-semibold">{c.brand} {c.model}</div>
                   <div className="truncate text-sm text-muted-foreground">

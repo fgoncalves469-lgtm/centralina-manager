@@ -83,14 +83,13 @@ export function gainPercent(before: number | null, after: number | null): number
 export type Role = Database["public"]["Enums"]["app_role"];
 export const ROLES: Record<Role, string> = {
   admin: "Admin",
-  contributor: "Contributor",
-  viewer: "View only",
+  contributor: "Client",
+  viewer: "Client",
 };
 
 /** Can this user edit a job? Admin: always. Contributor: if assigned or creator. Viewer: never. */
 export function canEditJob(role: Role | null | undefined, userId: string, job: { created_by: string }, assigneeIds: string[]) {
   if (role === "admin") return true;
-  if (role === "contributor") return job.created_by === userId || assigneeIds.includes(userId);
   return false;
 }
 
@@ -168,7 +167,7 @@ export function matchesVehicle(v: Vehicle, q: string) {
 export type Car = Database["public"]["Tables"]["cars"]["Row"];
 export type CarInsert = Database["public"]["Tables"]["cars"]["Insert"];
 
-export const isEditorRole = (role: Role | null | undefined) => role === "admin" || role === "contributor";
+export const isEditorRole = (role: Role | null | undefined) => role === "admin";
 
 /** Can delete a car: only admin and contributors (owners cannot). */
 export const canDeleteCar = (role: Role | null | undefined) => isEditorRole(role);
@@ -180,9 +179,9 @@ export function canEditCar(role: Role | null | undefined, userId: string, car: P
 
 /** Top navigation tabs. Add new sections here; `roles` limits who sees each one. */
 export const NAV_TABS: { to: "/trabalhos" | "/garage" | "/ecu-database" | "/utilizadores"; label: string; roles: Role[] }[] = [
-  { to: "/trabalhos", label: "Jobs", roles: ["admin", "contributor"] },
+  { to: "/trabalhos", label: "Jobs", roles: ["admin"] },
   { to: "/garage", label: "My Garage", roles: ["admin", "contributor", "viewer"] },
-  { to: "/ecu-database", label: "ECU Database", roles: ["admin", "contributor"] },
+  { to: "/ecu-database", label: "ECU Database", roles: ["admin"] },
   { to: "/utilizadores", label: "Users", roles: ["admin"] },
 ];
 export const tabsFor = (role: Role) => NAV_TABS.filter((t) => t.roles.includes(role));
