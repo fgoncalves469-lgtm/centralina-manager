@@ -1,0 +1,8 @@
+import { queryOptions } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+export const PUBLIC_STEPS={received:'Work received',analysis:'In analysis',development:'In development',testing:'In testing',validation:'Final validation',completed:'Completed'} as const;
+export const INTERNAL_STATES={received:'Received',diagnosis:'Diagnosis',analysis:'Technical analysis',calibration:'Calibration',testing:'Tests',validation:'Validation',completed:'Completed',suspended:'Suspended'} as const;
+export const progressQuery=(id:string)=>queryOptions({queryKey:['progress',id],queryFn:async()=>{const {data,error}=await supabase.from('job_progress').select('job_id,public_status,completed_steps,message,information_request,updated_at').eq('job_id',id).maybeSingle();if(error)throw error;return data;}});
+export const reportQuery=(id:string)=>queryOptions({queryKey:['report',id],queryFn:async()=>{const {data,error}=await supabase.from('job_reports').select('*').eq('job_id',id).maybeSingle();if(error)throw error;return data;}});
+export const historyQuery=(id:string)=>queryOptions({queryKey:['history',id],queryFn:async()=>{const {data,error}=await supabase.from('job_history').select('*').eq('job_id',id).order('created_at',{ascending:false});if(error)throw error;return data;}});
+export const carProgressQuery=(carId:string)=>queryOptions({queryKey:['cars',carId,'public-progress'],queryFn:async()=>{const {data:car,error:ce}=await supabase.from('cars').select('id').eq('id',carId).maybeSingle();if(ce)throw ce;if(!car)return [];const {data,error}=await supabase.rpc('car_public_progress',{_car_id:carId});if(error)throw error;return data;}});
