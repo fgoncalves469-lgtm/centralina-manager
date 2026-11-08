@@ -13,6 +13,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import { JobForm } from "@/components/JobForm";
 import { FileTimeline } from "@/components/FileTimeline";
+import { ProgressEditor } from '@/components/ProgressEditor';
+import { INTERNAL_STATES } from '@/lib/progress';
 import { assigneesQuery, canEditJob, gainPercent, jobFilesQuery, jobQuery, myRoleQuery, ROLES, STATUSES, teamQuery, type JobInsert, type Status } from "@/lib/jobs";
 
 export const Route = createFileRoute("/_authenticated/trabalhos/$id")({
@@ -46,7 +48,7 @@ function Stat({ label, before, after, unit }: { label: string; before: number | 
         {before ?? "—"} <span className="text-muted-foreground">→</span> <span className="text-primary">{after ?? "—"}</span>
         <span className="ml-1 text-lg text-muted-foreground">{unit}</span>
       </div>
-      {gain != null && <div className="mt-1 text-sm text-success">+{after! - before!} {unit} (+{gain}%)</div>}
+      {gain != null && before!=null && after!=null && <div className="mt-1 text-sm text-success">+{after - before} {unit} (+{gain}%)</div>}
     </div>
   );
 }
@@ -156,10 +158,10 @@ function JobDetail() {
           </div>
 
           <div className="mb-6 rounded-xl border bg-card p-4">
-            <div className="mb-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground">Assigned contributors</div>
+              <div className="mb-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground">Assigned administrators</div>
             {isAdmin ? (
               <div className="flex flex-wrap gap-2">
-                {team.filter((m) => m.role !== "viewer").map((m) => {
+                {team.filter((m) => m.role === "admin").map((m) => {
                   const on = assignees.includes(m.id);
                   return (
                     <Button key={m.id} size="sm" variant={on ? "default" : "outline"} onClick={() => toggleAssignee(m.id, !on)}>
@@ -200,7 +202,9 @@ function JobDetail() {
             </div>
           </div>
 
-          <FileTimeline jobId={id} files={files} canEdit={canEdit} />
+          <section className="mb-6 space-y-3 border-y py-5"><h2 className="text-2xl">Internal status</h2><Select value={job.internal_status} onValueChange={internal_status=>update.mutate({internal_status})}><SelectTrigger aria-label="Internal status"><SelectValue/></SelectTrigger><SelectContent>{Object.entries(INTERNAL_STATES).map(([key,label])=><SelectItem key={key} value={key}>{label}</SelectItem>)}</SelectContent></Select><p className="whitespace-pre-wrap text-sm">{job.mechanical_setup}</p><p className="whitespace-pre-wrap text-sm">{job.objective}</p><h3 className="font-semibold">Validated version</h3><Select value={job.validated_file_id??'none'} onValueChange={file=>update.mutate({validated_file_id:file==='none'?null:file})}><SelectTrigger aria-label="Validated version"><SelectValue/></SelectTrigger><SelectContent><SelectItem value="none">Not validated</SelectItem>{files.filter(f=>f.kind==='modified').map(f=><SelectItem key={f.id} value={f.id}>{f.file_name} · {new Date(f.created_at).toLocaleString('en-GB')}</SelectItem>)}</SelectContent></Select></section>
+          <ProgressEditor jobId={id} linked={!!job.car_id}/>
+          <FileTimeline jobId={id} files={files} canEdit={canEdit} validatedFileId={job.validated_file_id}/>
         </>
       )}
     </div>

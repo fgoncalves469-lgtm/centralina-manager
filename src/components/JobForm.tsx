@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useQuery } from "@tanstack/react-query";
 import { PickOrType } from "@/components/PickOrType";
-import { engineLabel, STAGES, vehiclesQuery, type Job, type JobInsert } from "@/lib/jobs";
+import { carsQuery, engineLabel, STAGES, vehiclesQuery, type Job, type JobInsert } from "@/lib/jobs";
 
 type Props = {
   initial?: Partial<Job>;
@@ -19,6 +19,7 @@ const num = (v: string) => (v.trim() === "" ? null : Number(v.replace(",", "."))
 
 export function JobForm({ initial = {}, submitLabel, busy, onSubmit }: Props) {
   const [v, setV] = useState({
+    car_id:initial.car_id??'', mechanical_setup:initial.mechanical_setup??'', objective:initial.objective??'',
     client_name: initial.client_name ?? "",
     client_phone: initial.client_phone ?? "",
     brand: initial.brand ?? "",
@@ -38,6 +39,7 @@ export function JobForm({ initial = {}, submitLabel, busy, onSubmit }: Props) {
     setV({ ...v, [k]: e.target.value });
 
   const { data: vehicles = [] } = useQuery(vehiclesQuery());
+  const { data:cars=[] }=useQuery(carsQuery());
   const uniq = (a: string[]) => [...new Set(a)];
   const brands = uniq(vehicles.map((x) => x.brand));
   const inModel = vehicles.filter((x) => x.brand === v.brand && x.model === v.model);
@@ -54,7 +56,8 @@ export function JobForm({ initial = {}, submitLabel, busy, onSubmit }: Props) {
   function submit(e: React.FormEvent) {
     e.preventDefault();
     onSubmit({
-      car_id: initial.car_id ?? null,
+      car_id: v.car_id || null,
+      mechanical_setup:v.mechanical_setup||null, objective:v.objective||null,
       client_name: v.client_name.trim(),
       client_phone: v.client_phone || null,
       brand: v.brand.trim(),
@@ -81,6 +84,7 @@ export function JobForm({ initial = {}, submitLabel, busy, onSubmit }: Props) {
 
   return (
     <form onSubmit={submit} className="space-y-6">
+      <div className="space-y-2"><Label>Linked vehicle</Label><Select value={v.car_id||'none'} onValueChange={id=>{const car=cars.find(c=>c.id===id);setV({...v,car_id:id==='none'?'':id,...(car?{brand:car.brand,model:car.model,engine:car.engine??'',ecu:car.ecu??'',plate:car.plate??'',year:car.year?.toString()??''}:{})});}}><SelectTrigger aria-label="Linked vehicle"><SelectValue/></SelectTrigger><SelectContent><SelectItem value="none">Not linked</SelectItem>{cars.map(c=><SelectItem key={c.id} value={c.id}>{c.brand} {c.model} · {c.plate??c.id.slice(0,8)}</SelectItem>)}</SelectContent></Select></div>
       <section className="rounded-xl border bg-card p-5">
         <h2 className="mb-4 text-2xl">Car</h2>
         <div className="grid gap-4 sm:grid-cols-2">
@@ -121,6 +125,8 @@ export function JobForm({ initial = {}, submitLabel, busy, onSubmit }: Props) {
           {field("nm_after", "Nm after", { inputMode: "decimal" })}
         </div>
         <div className="mt-4 space-y-1.5">
+          <Label htmlFor="mechanical_setup">Mechanical configuration</Label><Textarea id="mechanical_setup" value={v.mechanical_setup} onChange={set('mechanical_setup')}/>
+          <Label htmlFor="objective">Intervention objective</Label><Textarea id="objective" value={v.objective} onChange={set('objective')}/>
           <Label htmlFor="notes">Notes</Label>
           <Textarea id="notes" rows={3} value={v.notes} onChange={set("notes")} />
         </div>
