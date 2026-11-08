@@ -29,6 +29,7 @@ export type Database = {
           model: string
           notes: string | null
           owner_id: string | null
+          photo_path: string | null
           plate: string | null
           vin: string | null
           year: number | null
@@ -47,6 +48,7 @@ export type Database = {
           model?: string
           notes?: string | null
           owner_id?: string | null
+          photo_path?: string | null
           plate?: string | null
           vin?: string | null
           year?: number | null
@@ -65,20 +67,55 @@ export type Database = {
           model?: string
           notes?: string | null
           owner_id?: string | null
+          photo_path?: string | null
           plate?: string | null
           vin?: string | null
           year?: number | null
         }
         Relationships: []
       }
+      file_history: {
+        Row: {
+          actor_id: string | null
+          created_at: string
+          details: Json
+          file_id: string
+          id: string
+        }
+        Insert: {
+          actor_id?: string | null
+          created_at?: string
+          details: Json
+          file_id: string
+          id?: string
+        }
+        Update: {
+          actor_id?: string | null
+          created_at?: string
+          details?: Json
+          file_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "file_history_file_id_fkey"
+            columns: ["file_id"]
+            isOneToOne: false
+            referencedRelation: "job_files"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       file_logs: {
         Row: {
           created_at: string
           file_id: string
           file_name: string
+          format: string | null
           id: string
           note: string | null
           path: string
+          sha256: string | null
           size: number | null
           uploaded_by: string
           uploaded_by_email: string | null
@@ -87,9 +124,11 @@ export type Database = {
           created_at?: string
           file_id: string
           file_name: string
+          format?: string | null
           id?: string
           note?: string | null
           path: string
+          sha256?: string | null
           size?: number | null
           uploaded_by?: string
           uploaded_by_email?: string | null
@@ -98,9 +137,11 @@ export type Database = {
           created_at?: string
           file_id?: string
           file_name?: string
+          format?: string | null
           id?: string
           note?: string | null
           path?: string
+          sha256?: string | null
           size?: number | null
           uploaded_by?: string
           uploaded_by_email?: string | null
@@ -145,11 +186,13 @@ export type Database = {
         Row: {
           created_at: string
           file_name: string
+          format: string | null
           id: string
           job_id: string
           kind: string
           notes: string | null
           path: string
+          sha256: string | null
           size: number | null
           uploaded_by: string
           uploaded_by_email: string | null
@@ -157,11 +200,13 @@ export type Database = {
         Insert: {
           created_at?: string
           file_name: string
+          format?: string | null
           id?: string
           job_id: string
           kind?: string
           notes?: string | null
           path: string
+          sha256?: string | null
           size?: number | null
           uploaded_by?: string
           uploaded_by_email?: string | null
@@ -169,11 +214,13 @@ export type Database = {
         Update: {
           created_at?: string
           file_name?: string
+          format?: string | null
           id?: string
           job_id?: string
           kind?: string
           notes?: string | null
           path?: string
+          sha256?: string | null
           size?: number | null
           uploaded_by?: string
           uploaded_by_email?: string | null
@@ -183,6 +230,111 @@ export type Database = {
             foreignKeyName: "job_files_job_id_fkey"
             columns: ["job_id"]
             isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      job_history: {
+        Row: {
+          actor_id: string | null
+          created_at: string
+          details: Json
+          event: string
+          id: string
+          job_id: string
+        }
+        Insert: {
+          actor_id?: string | null
+          created_at?: string
+          details?: Json
+          event: string
+          id?: string
+          job_id: string
+        }
+        Update: {
+          actor_id?: string | null
+          created_at?: string
+          details?: Json
+          event?: string
+          id?: string
+          job_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_history_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      job_progress: {
+        Row: {
+          completed_steps: string[]
+          final_report: string | null
+          information_request: string | null
+          job_id: string
+          message: string | null
+          public_status: string
+          report_released: boolean
+          updated_at: string
+        }
+        Insert: {
+          completed_steps?: string[]
+          final_report?: string | null
+          information_request?: string | null
+          job_id: string
+          message?: string | null
+          public_status?: string
+          report_released?: boolean
+          updated_at?: string
+        }
+        Update: {
+          completed_steps?: string[]
+          final_report?: string | null
+          information_request?: string | null
+          job_id?: string
+          message?: string | null
+          public_status?: string
+          report_released?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_progress_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: true
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      job_reports: {
+        Row: {
+          content: string
+          job_id: string
+          released: boolean
+          updated_at: string
+        }
+        Insert: {
+          content?: string
+          job_id: string
+          released?: boolean
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          job_id?: string
+          released?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_reports_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: true
             referencedRelation: "jobs"
             referencedColumns: ["id"]
           },
@@ -201,13 +353,17 @@ export type Database = {
           hp_after: number | null
           hp_before: number | null
           id: string
+          internal_status: string
+          mechanical_setup: string | null
           model: string
           nm_after: number | null
           nm_before: number | null
           notes: string | null
+          objective: string | null
           plate: string | null
           stage: string
           status: string
+          validated_file_id: string | null
           year: number | null
         }
         Insert: {
@@ -222,13 +378,17 @@ export type Database = {
           hp_after?: number | null
           hp_before?: number | null
           id?: string
+          internal_status?: string
+          mechanical_setup?: string | null
           model?: string
           nm_after?: number | null
           nm_before?: number | null
           notes?: string | null
+          objective?: string | null
           plate?: string | null
           stage?: string
           status?: string
+          validated_file_id?: string | null
           year?: number | null
         }
         Update: {
@@ -243,13 +403,17 @@ export type Database = {
           hp_after?: number | null
           hp_before?: number | null
           id?: string
+          internal_status?: string
+          mechanical_setup?: string | null
           model?: string
           nm_after?: number | null
           nm_before?: number | null
           notes?: string | null
+          objective?: string | null
           plate?: string | null
           stage?: string
           status?: string
+          validated_file_id?: string | null
           year?: number | null
         }
         Relationships: [
@@ -258,6 +422,13 @@ export type Database = {
             columns: ["car_id"]
             isOneToOne: false
             referencedRelation: "cars"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "jobs_validated_file_id_fkey"
+            columns: ["validated_file_id"]
+            isOneToOne: false
+            referencedRelation: "job_files"
             referencedColumns: ["id"]
           },
         ]
@@ -279,6 +450,44 @@ export type Database = {
           id?: string
         }
         Relationships: []
+      }
+      test_sessions: {
+        Row: {
+          conditions: string
+          created_by: string
+          file_id: string
+          id: string
+          observations: string
+          recorded_at: string
+          results: string
+        }
+        Insert: {
+          conditions?: string
+          created_by?: string
+          file_id: string
+          id?: string
+          observations?: string
+          recorded_at?: string
+          results?: string
+        }
+        Update: {
+          conditions?: string
+          created_by?: string
+          file_id?: string
+          id?: string
+          observations?: string
+          recorded_at?: string
+          results?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "test_sessions_file_id_fkey"
+            columns: ["file_id"]
+            isOneToOne: false
+            referencedRelation: "job_files"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {

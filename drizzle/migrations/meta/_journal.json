@@ -36,6 +36,13 @@
       "when": 1793959230045,
       "tag": "0004_my_garage_cars",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1794096606391,
+      "tag": "0005_admin_client_progress_and_integrity",
+      "breakpoints": true
     }
   ]
 }
