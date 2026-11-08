@@ -46,7 +46,7 @@ function UsersPage() {
       </Link>
       <h1 className="text-5xl">Users</h1>
       <p className="mb-6 text-sm text-muted-foreground">
-        New people sign up on the login page and start as <b>View only</b>. Contributors can edit jobs assigned to them.
+        New accounts start as <b>Client</b>.
       </p>
       <ul className="space-y-2">
         {team.map((m) => (
@@ -58,7 +58,7 @@ function UsersPage() {
               <Select value={m.role} onValueChange={(r) => setRole(m.id, r as Role)}>
                 <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {(Object.keys(ROLES) as Role[]).map((r) => <SelectItem key={r} value={r}>{ROLES[r]}</SelectItem>)}
+                  {(['admin','viewer'] as Role[]).map((r) => <SelectItem key={r} value={r}>{ROLES[r]}</SelectItem>)}
                 </SelectContent>
               </Select>
             ) : (

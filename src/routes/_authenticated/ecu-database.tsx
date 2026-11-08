@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { ArrowLeft, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -25,11 +25,11 @@ export const Route = createFileRoute("/_authenticated/ecu-database")({
       { name: "twitter:card", content: "summary" },
     ],
   }),
-  loader: ({ context }) =>
-    Promise.all([
-      context.queryClient.ensureQueryData(vehiclesQuery()),
-      context.queryClient.ensureQueryData(myRoleQuery(context.user.id)),
-    ]),
+  loader: async ({ context }) => {
+    const role=await context.queryClient.ensureQueryData(myRoleQuery(context.user.id));
+    if(role!=='admin') throw redirect({to:'/garage'});
+    await context.queryClient.ensureQueryData(vehiclesQuery());
+  },
   component: EcuDatabase,
 });
 
@@ -40,7 +40,7 @@ function EcuDatabase() {
   const { data: role } = useSuspenseQuery(myRoleQuery(user.id));
   const { data: vehicles } = useSuspenseQuery(vehiclesQuery());
   const qc = useQueryClient();
-  const canEdit = role === "admin" || role === "contributor";
+  const canEdit = role === "admin";
 
   const [brand, setBrand] = useState(ALL);
   const [model, setModel] = useState(ALL);

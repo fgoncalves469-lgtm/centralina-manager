@@ -13,6 +13,12 @@ import {
   AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { CarForm } from "@/components/CarForm";
+import { useQuery } from '@tanstack/react-query';
+import { useServerFn } from '@tanstack/react-start';
+import { saveVehiclePhoto } from '@/lib/photos.functions';
+import { VehiclePhoto } from '@/components/VehiclePhoto';
+import { ClientProgress } from '@/components/ClientProgress';
+import { carProgressQuery } from '@/lib/progress';
 import {
   canDeleteCar, canEditCar, carJobsQuery, carQuery, gainPercent, isEditorRole, myRoleQuery, STATUSES, teamQuery,
   type CarInsert, type Status,
@@ -31,7 +37,6 @@ export const Route = createFileRoute("/_authenticated/garage/$id")({
     const car = await context.queryClient.ensureQueryData(carQuery(params.id));
     if (!car) throw notFound();
     await Promise.all([
-      context.queryClient.ensureQueryData(carJobsQuery(params.id)),
       context.queryClient.ensureQueryData(myRoleQuery(context.user.id)),
       context.queryClient.ensureQueryData(teamQuery()),
     ]);
@@ -45,12 +50,15 @@ function CarDetail() {
   const { id } = Route.useParams();
   const { user } = Route.useRouteContext();
   const { data: car } = useSuspenseQuery(carQuery(id));
-  const { data: jobs } = useSuspenseQuery(carJobsQuery(id));
   const { data: role } = useSuspenseQuery(myRoleQuery(user.id));
+  const { data: jobs=[] } = useQuery({...carJobsQuery(id),enabled:role==='admin'});
+  const { data:publicProgress=[] }=useQuery(carProgressQuery(id));
+  const savePhoto=useServerFn(saveVehiclePhoto);
   const { data: team } = useSuspenseQuery(teamQuery());
   const qc = useQueryClient();
   const navigate = useNavigate();
   const [editing, setEditing] = useState(false);
+  async function saveCar(values:CarInsert,photo?:Blob|null){await update.mutateAsync(values);if(photo!==undefined){let base64:string|null=null;if(photo){const bytes=new Uint8Array(await photo.arrayBuffer());let binary='';for(const b of bytes)binary+=String.fromCharCode(b);base64=btoa(binary);}try{await savePhoto({data:{carId:id,base64}});qc.invalidateQueries({queryKey:['cars']});}catch{toast.error('Car saved, but photo could not be updated');}}}
 
   const update = useMutation({
     mutationFn: async (values: Partial<CarInsert>) => {
@@ -97,7 +105,7 @@ function CarDetail() {
             <h1 className="text-5xl">Edit car</h1>
             <Button variant="ghost" onClick={() => setEditing(false)}>Cancel</Button>
           </div>
-          <CarForm initial={car} submitLabel="Save changes" busy={update.isPending} onSubmit={(v) => update.mutate(v)} />
+          <CarForm initial={car} submitLabel="Save changes" busy={update.isPending} onSubmit={saveCar} />
         </>
       ) : (
         <>
@@ -127,7 +135,8 @@ function CarDetail() {
             </div>
           </div>
 
-          <section className="mb-6 grid grid-cols-2 gap-3 rounded-xl border bg-card p-5 sm:grid-cols-3">
+          <VehiclePhoto path={car.photo_path} name={`${car.brand} ${car.model}`}/>
+          <section className="mb-6 grid grid-cols-2 gap-3 border-y py-5 sm:grid-cols-3">
             {details.map(([k, val]) => (
               <div key={k}>
                 <div className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">{k}</div>
@@ -151,12 +160,12 @@ function CarDetail() {
           )}
 
           <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-3xl">Tuning history</h2>
+            <h2 className="text-3xl">{editor?'Tuning history':'Work progress'}</h2>
             {editor && (
               <Button asChild size="sm"><Link to="/trabalhos/novo" search={{ car: car.id }}><Plus /> New job</Link></Button>
             )}
           </div>
-          {jobs.length === 0 ? (
+          {!editor ? (publicProgress.length?publicProgress.map(p=><ClientProgress key={p.job_id} progress={p}/>):<p className="py-6 text-sm text-muted-foreground">No published updates yet.</p>) : jobs.length === 0 ? (
             <div className="rounded-xl border border-dashed p-8 text-center text-muted-foreground">No jobs on this car yet.</div>
           ) : (
             <ul className="space-y-2">
