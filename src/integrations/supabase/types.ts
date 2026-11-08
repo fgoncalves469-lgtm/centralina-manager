@@ -550,6 +550,17 @@ export type Database = {
     Functions: {
       can_edit_file: { Args: { _file_id: string }; Returns: boolean }
       can_edit_job: { Args: { _job_id: string }; Returns: boolean }
+      car_public_progress: {
+        Args: { _car_id: string }
+        Returns: {
+          completed_steps: string[]
+          information_request: string
+          job_id: string
+          message: string
+          public_status: string
+          updated_at: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

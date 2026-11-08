@@ -43,6 +43,13 @@
       "when": 1794096606391,
       "tag": "0005_admin_client_progress_and_integrity",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1794096658488,
+      "tag": "0006_safe_client_progress_projection",
+      "breakpoints": true
     }
   ]
 }
