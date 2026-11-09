@@ -34,7 +34,7 @@ function AppLayout() {
       <header className="sticky top-0 z-20 border-b bg-background/85 backdrop-blur">
         <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
           <Link to="/garage" className="font-display text-2xl tracking-wider">
-            REMAP<span className="text-primary">GARAGE</span>
+            APEX<span className="text-primary"> BLEU</span><span className="ml-2 inline-block size-1.5 bg-chart-4"/>
           </Link>
           <div className="flex items-center gap-2">
             <span className="hidden text-sm text-muted-foreground sm:inline">{user.email}</span>

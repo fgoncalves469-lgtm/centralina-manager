@@ -30,10 +30,6 @@ function AuthPage() {
     supabase.auth.getSession().then(({ data }) => {
       if (data.session) navigate({ to: "/trabalhos", replace: true });
     });
-    const { data } = supabase.auth.onAuthStateChange((_e, session) => {
-      if (session) navigate({ to: "/trabalhos", replace: true });
-    });
-    return () => data.subscription.unsubscribe();
   }, [navigate]);
 
   async function submit(e: React.FormEvent) {
@@ -42,6 +38,7 @@ function AuthPage() {
     if (mode === "in") {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) toast.error("Wrong email or password");
+      else navigate({to:'/trabalhos',replace:true});
     } else {
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -50,6 +47,7 @@ function AuthPage() {
       });
       if (error) toast.error(error.message);
       else if (!data.session) toast.success("Account created! Check your email to confirm.");
+      else navigate({to:'/garage',replace:true});
     }
     setBusy(false);
   }
@@ -59,18 +57,19 @@ function AuthPage() {
       redirect_uri: window.location.origin,
     });
     if (result.error) toast.error("Could not sign in with Google");
+    else {const {data}=await supabase.auth.getSession();if(data.session)navigate({to:'/trabalhos',replace:true});}
   }
 
   return (
     <div className="flex min-h-screen items-center justify-center px-4">
       <div className="w-full max-w-sm">
         <h1 className="mb-1 text-center text-5xl">
-          REMAP<span className="text-primary">GARAGE</span>
+          APEX<span className="text-primary"> BLEU</span>
         </h1>
         <p className="mb-8 text-center text-muted-foreground">
           {mode === "in" ? "Sign in to your account" : "Create your account"}
         </p>
-        <div className="rounded-xl border bg-card p-6 shadow-glow">
+        <div className="border-y py-6">
           <Button variant="outline" className="w-full" onClick={google}>
             Continue with Google
           </Button>
@@ -89,12 +88,12 @@ function AuthPage() {
             </Button>
           </form>
         </div>
-        <button
+        <Button variant="ghost"
           className="mt-4 w-full text-center text-sm text-muted-foreground hover:text-foreground"
           onClick={() => setMode(mode === "in" ? "up" : "in")}
         >
           {mode === "in" ? "No account yet? Sign up" : "Already have an account? Sign in"}
-        </button>
+        </Button>
       </div>
     </div>
   );

@@ -1,0 +1,3 @@
+export const TECHNICAL_FILE_LIMIT=50*1024*1024;
+export function validateTechnicalSize(size:number){if(size<=0 || size>TECHNICAL_FILE_LIMIT)throw new Error('Files must be between 1 byte and 50 MB');}
+export async function fileMetadata(file:Blob,name:string){validateTechnicalSize(file.size);const digest=await crypto.subtle.digest('SHA-256',await file.arrayBuffer());return {sha256:Array.from(new Uint8Array(digest),b=>b.toString(16).padStart(2,'0')).join(''),format:name.includes('.')?name.split('.').pop()?.toUpperCase()??'UNKNOWN':'UNKNOWN'};}

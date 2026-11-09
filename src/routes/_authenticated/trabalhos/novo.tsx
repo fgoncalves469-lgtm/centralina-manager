@@ -1,11 +1,11 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate, redirect } from "@tanstack/react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { JobForm } from "@/components/JobForm";
 import { useQuery } from "@tanstack/react-query";
-import { carQuery, type JobInsert } from "@/lib/jobs";
+import { carQuery, myRoleQuery, type JobInsert } from "@/lib/jobs";
 
 export const Route = createFileRoute("/_authenticated/trabalhos/novo")({
   head: () => ({
@@ -17,6 +17,7 @@ export const Route = createFileRoute("/_authenticated/trabalhos/novo")({
     ],
   }),
   validateSearch: (s: Record<string, unknown>): { car?: string } => (typeof s["car"] === "string" ? { car: s["car"] } : {}),
+  loader:async({context})=>{const role=await context.queryClient.ensureQueryData(myRoleQuery(context.user.id));if(role!=='admin')throw redirect({to:'/garage'});},
   component: NewJob,
 });
 

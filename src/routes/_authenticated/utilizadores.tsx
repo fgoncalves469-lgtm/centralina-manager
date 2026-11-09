@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link,redirect } from "@tanstack/react-router";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
@@ -16,6 +16,7 @@ export const Route = createFileRoute("/_authenticated/utilizadores")({
     ],
   }),
   loader: async ({ context }) => {
+    const role=await context.queryClient.ensureQueryData(myRoleQuery(context.user.id));if(role!=='admin')throw redirect({to:'/garage'});
     await Promise.all([
       context.queryClient.ensureQueryData(teamQuery()),
       context.queryClient.ensureQueryData(myRoleQuery(context.user.id)),
