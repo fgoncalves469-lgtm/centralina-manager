@@ -11,7 +11,7 @@ import { Select,SelectTrigger,SelectContent,SelectItem,SelectValue } from './ui/
 export function ProgressEditor({jobId,linked}: {jobId:string;linked:boolean}) {
   const {data:progress,isLoading}=useQuery(progressQuery(jobId)); const {data:report,isLoading:rl}=useQuery(reportQuery(jobId));
   if(isLoading || rl)return null;
-  return <ProgressForm key={`${progress?.updated_at}:${report?.updated_at}`} jobId={jobId} linked={linked} initial={progress} report={report}/>;
+  return <ProgressForm key={`${progress?.updated_at}:${report?.updated_at}`} jobId={jobId} linked={linked} initial={progress??null} report={report??null}/>;
 }
 function ProgressForm({jobId,linked,initial,report}: {jobId:string;linked:boolean;initial?:{public_status:string;completed_steps:string[];message:string|null;information_request:string|null}|null;report?:{content:string;released:boolean}|null}) {
   const qc=useQueryClient(); const {data:history=[]}=useQuery(historyQuery(jobId));

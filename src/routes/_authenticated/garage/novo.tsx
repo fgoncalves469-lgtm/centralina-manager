@@ -26,7 +26,7 @@ function NewCar() {
   const qc = useQueryClient();
   const savePhoto=useServerFn(saveVehiclePhoto);
   const create = useMutation({
-    mutationFn: async ({values,photo}: {values:CarInsert;photo?:Blob|null}) => {
+    mutationFn: async ({values,photo}: {values:CarInsert;photo:Blob|null|undefined}) => {
       const { data, error } = await supabase.from("cars").insert({ ...values, owner_id: user.id }).select().single();
       if (error) throw error;
       if(photo) { const bytes=new Uint8Array(await photo.arrayBuffer());let binary='';for(const b of bytes)binary+=String.fromCharCode(b);try{await savePhoto({data:{carId:data.id,base64:btoa(binary)}});}catch{toast.error('Car saved, but photo failed. You can retry in Edit car.');} }

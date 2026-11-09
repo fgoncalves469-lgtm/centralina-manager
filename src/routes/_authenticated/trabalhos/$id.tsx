@@ -1,4 +1,4 @@
-import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, notFound, redirect, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { ArrowLeft, Pencil, Phone, Trash2 } from "lucide-react";
@@ -27,6 +27,8 @@ export const Route = createFileRoute("/_authenticated/trabalhos/$id")({
     ],
   }),
   loader: async ({ context, params }) => {
+    const role=await context.queryClient.ensureQueryData(myRoleQuery(context.user.id));
+    if(role!=='admin')throw redirect({to:'/garage'});
     const job = await context.queryClient.ensureQueryData(jobQuery(params.id));
     if (!job) throw notFound();
     await Promise.all([
@@ -80,6 +82,7 @@ function JobDetail() {
 
   const remove = useMutation({
     mutationFn: async () => {
+      if(files.some(f=>f.kind==='original') || job?.validated_file_id)throw new Error('Protected files prevent deletion');
       const { data: logs } = await supabase.from("file_logs").select("path").in("file_id", files.map((f) => f.id));
       const paths = [...files.map((f) => f.path), ...(logs ?? []).map((l) => l.path)];
       if (paths.length) await supabase.storage.from("ecu-files").remove(paths);
@@ -129,7 +132,7 @@ function JobDetail() {
             </div>
             <div className="flex gap-2">
               {canEdit && <Button variant="outline" size="icon" onClick={() => setEditing(true)} aria-label="Edit"><Pencil /></Button>}
-              {isAdmin && <AlertDialog>
+              {isAdmin && !files.some(f=>f.kind==='original') && !job.validated_file_id && <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <Button variant="outline" size="icon" aria-label="Delete"><Trash2 /></Button>
                 </AlertDialogTrigger>

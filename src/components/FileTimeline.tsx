@@ -11,6 +11,8 @@ import {
   Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
 import { FILE_KINDS, fileLogsQuery, safeName, type FileLog, type JobFile } from "@/lib/jobs";
+import { fileMetadata, validateTechnicalSize } from '@/lib/files';
+import { TestSessions } from './TestSessions';
 
 const BUCKET = "ecu-files";
 const fmtDate = (d: string) =>
@@ -52,13 +54,7 @@ function UploadDialog({
   async function submit() {
     if (!file) return;
     setBusy(true);
-    const ok = await onSubmit(file, note, kind);
-    setBusy(false);
-    if (ok) {
-      setOpen(false);
-      setFile(null);
-      setNote("");
-    }
+    try {validateTechnicalSize(file.size);const ok=await onSubmit(file,note,kind);if(ok){setOpen(false);setFile(null);setNote('');}}catch(error){toast.error(error instanceof Error?error.message:'Upload failed');}finally{setBusy(false);}
   }
 
   return (
@@ -76,14 +72,14 @@ function UploadDialog({
               ))}
             </div>
           )}
-          <button
+          <Button variant="outline"
             type="button"
             onClick={() => ref.current?.click()}
             className="flex w-full items-center gap-3 rounded-lg border border-dashed p-4 text-left text-sm hover:border-primary"
           >
             <Upload className="size-5 text-primary" />
             <span className="truncate">{file ? `${file.name} · ${fmtSize(file.size)}` : "Choose file (max 50 MB)"}</span>
-          </button>
+          </Button>
           <input ref={ref} type="file" className="hidden" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
           <div className="space-y-1.5">
             <Label>Notes</Label>
@@ -98,7 +94,7 @@ function UploadDialog({
   );
 }
 
-function FileCard({ jobId, file, version, logs, canEdit }: { jobId: string; file: JobFile; version: number; logs: FileLog[]; canEdit: boolean }) {
+function FileCard({ jobId, file, version, logs, canEdit,validated }: { jobId: string; file: JobFile; version: number; logs: FileLog[]; canEdit: boolean;validated:boolean }) {
   const qc = useQueryClient();
   const [editing, setEditing] = useState(false);
   const [notes, setNotes] = useState(file.notes ?? "");
@@ -112,21 +108,26 @@ function FileCard({ jobId, file, version, logs, canEdit }: { jobId: string; file
   }
 
   async function deleteFile() {
+    if(file.kind==='original' || validated)return;
     if (!confirm("Delete this file and its logs?")) return;
-    await supabase.storage.from(BUCKET).remove([file.path, ...logs.map((l) => l.path)]);
-    await supabase.from("job_files").delete().eq("id", file.id);
+    const {error}=await supabase.from("job_files").delete().eq("id", file.id);
+    if(error)return void toast.error('Could not delete file');
+    const {error:storageError}=await supabase.storage.from(BUCKET).remove([file.path, ...logs.map((l) => l.path)]);
+    if(storageError)toast.error('File record removed; storage cleanup failed');
     refresh();
   }
 
   async function addLog(f: File, note: string) {
-    const path = `${jobId}/logs/${file.id}/${Date.now()}-${safeName(f.name)}`;
+    const metadata=await fileMetadata(f,f.name);
+    const path = `${jobId}/logs/${file.id}/${crypto.randomUUID()}-${safeName(f.name)}`;
     const up = await supabase.storage.from(BUCKET).upload(path, f);
     if (up.error) {
       toast.error("Upload failed");
       return false;
     }
-    const { error } = await supabase.from("file_logs").insert({ file_id: file.id, file_name: f.name, path, size: f.size, note: note || null });
+    const { error } = await supabase.from("file_logs").insert({ ...metadata,file_id: file.id, file_name: f.name, path, size: f.size, note: note || null });
     if (error) {
+      await supabase.storage.from(BUCKET).remove([path]);
       toast.error("Could not save log");
       return false;
     }
@@ -155,13 +156,15 @@ function FileCard({ jobId, file, version, logs, canEdit }: { jobId: string; file
             <div className="flex flex-wrap items-center gap-2">
               <span className="truncate font-medium">{file.file_name}</span>
               <Badge variant={isMap ? "default" : "secondary"}>{FILE_KINDS[file.kind as keyof typeof FILE_KINDS] ?? file.kind}</Badge>
+              {validated && <Badge variant="outline">Validated</Badge>}
+              {file.kind==='original' && <Badge variant="outline">Protected original</Badge>}
             </div>
             <div className="text-xs text-muted-foreground">
               {who(file.uploaded_by_email)} · {fmtDate(file.created_at)} {file.size ? `· ${fmtSize(file.size)}` : ""}
             </div>
           </div>
           <Button size="icon" variant="ghost" onClick={() => downloadPath(file.path, file.file_name)} aria-label="Download"><Download /></Button>
-          {canEdit && <Button size="icon" variant="ghost" onClick={deleteFile} aria-label="Delete file"><Trash2 /></Button>}
+          {canEdit && file.kind!=='original' && !validated && <Button size="icon" variant="ghost" onClick={deleteFile} aria-label="Delete file"><Trash2 /></Button>}
         </div>
 
         <div className="mt-3 rounded-lg bg-muted p-3">
@@ -178,13 +181,14 @@ function FileCard({ jobId, file, version, logs, canEdit }: { jobId: string; file
               <p className="flex-1 whitespace-pre-wrap text-sm">
                 {file.notes || <span className="text-muted-foreground">No notes on this version yet.</span>}
               </p>
-              {canEdit && <button onClick={() => setEditing(true)} className="text-muted-foreground hover:text-foreground" aria-label="Edit notes">
+              {canEdit && <Button size="icon" variant="ghost" onClick={() => setEditing(true)} className="text-muted-foreground hover:text-foreground" aria-label="Edit notes">
                 <Pencil className="size-4" />
-              </button>}
+              </Button>}
             </div>
           )}
         </div>
 
+        <details className="mt-3 text-xs text-muted-foreground"><summary className="cursor-pointer">File metadata</summary><p>{file.format??'Legacy format'} · {fmtSize(file.size)}</p><p className="break-all">SHA-256: {file.sha256??'Not verified for legacy file'}</p></details>
         <div className="mt-3">
           <div className="mb-2 flex items-center justify-between">
             <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Logs ({logs.length})</span>
@@ -212,12 +216,13 @@ function FileCard({ jobId, file, version, logs, canEdit }: { jobId: string; file
             </ul>
           )}
         </div>
+        <TestSessions fileId={file.id}/>
       </div>
     </li>
   );
 }
 
-export function FileTimeline({ jobId, files, canEdit }: { jobId: string; files: JobFile[]; canEdit: boolean }) {
+export function FileTimeline({ jobId, files, canEdit, validatedFileId }: { jobId: string; files: JobFile[]; canEdit: boolean;validatedFileId:string|null }) {
   const qc = useQueryClient();
   const ids = files.map((f) => f.id);
   const { data: logs = [] } = useQuery(fileLogsQuery(jobId, ids));
@@ -225,14 +230,16 @@ export function FileTimeline({ jobId, files, canEdit }: { jobId: string; files: 
   const ordered = [...files].sort((a, b) => a.created_at.localeCompare(b.created_at));
 
   async function addFile(f: File, note: string, kind: keyof typeof FILE_KINDS) {
-    const path = `${jobId}/${kind}-${Date.now()}-${safeName(f.name)}`;
+    const metadata=await fileMetadata(f,f.name);
+    const path = `${jobId}/${kind}-${crypto.randomUUID()}-${safeName(f.name)}`;
     const up = await supabase.storage.from(BUCKET).upload(path, f);
     if (up.error) {
       toast.error("Upload failed");
       return false;
     }
-    const { error } = await supabase.from("job_files").insert({ job_id: jobId, kind, file_name: f.name, path, size: f.size, notes: note || null });
+    const { error } = await supabase.from("job_files").insert({ ...metadata,job_id: jobId, kind, file_name: f.name, path, size: f.size, notes: note || null });
     if (error) {
+      await supabase.storage.from(BUCKET).remove([path]);
       toast.error("Could not save file");
       return false;
     }
@@ -260,7 +267,7 @@ export function FileTimeline({ jobId, files, canEdit }: { jobId: string; files: 
       ) : (
         <ol className="relative space-y-4 before:absolute before:bottom-0 before:left-3 before:top-0 before:w-px before:bg-border">
           {ordered.map((f, i) => ({ f, v: i + 1 })).reverse().map(({ f, v }) => (
-            <FileCard key={f.id} jobId={jobId} file={f} version={v} logs={logs.filter((l) => l.file_id === f.id)} canEdit={canEdit} />
+            <FileCard key={f.id} jobId={jobId} file={f} version={v} logs={logs.filter((l) => l.file_id === f.id)} canEdit={canEdit} validated={f.id===validatedFileId}/>
           ))}
         </ol>
       )}
